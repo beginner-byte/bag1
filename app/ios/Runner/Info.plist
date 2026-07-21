@@ -18,12 +18,13 @@
 	<string>Co Here</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<!-- 版本号与构建号由 Flutter 工作流参数写入，确保 IPA 元数据与本次打包输入一致。 -->
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>100</string>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
