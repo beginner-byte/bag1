@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title description">
+  <title id="title">Co Here brand mark</title>
+  <desc id="description">Two open circular paths and two member nodes represent people sharing one collaborative space.</desc>
+  <defs>
+    <linearGradient id="mint" x1="210" y1="330" x2="820" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#35D0AE"/>
+      <stop offset="1" stop-color="#58D6A6"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="210" y1="510" x2="820" y2="710" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5264F5"/>
+      <stop offset="1" stop-color="#3F73F3"/>
+    </linearGradient>
+  </defs>
+  <path
+    d="M 224 355 A 332 332 0 0 1 804 504"
+    fill="none"
+    stroke="url(#mint)"
+    stroke-width="122"
+    stroke-linecap="round"
+  />
+  <circle cx="760" cy="255" r="70" fill="url(#mint)"/>
+  <path
+    d="M 800 669 A 332 332 0 0 1 220 520"
+    fill="none"
+    stroke="url(#blue)"
+    stroke-width="122"
+    stroke-linecap="round"
+  />
+  <circle cx="264" cy="769" r="70" fill="url(#blue)"/>
+</svg>

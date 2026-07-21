@@ -1,0 +1,4 @@
+#include "Generated.xcconfig"
+
+// CI 通过自定义变量传入 Runner 的描述文件，避免 Swift Package targets 继承签名设置。
+PROVISIONING_PROFILE_SPECIFIER = $(RUNNER_PROVISIONING_PROFILE_SPECIFIER)

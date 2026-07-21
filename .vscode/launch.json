@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "name": "Worker App（本地服务）",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/app",
+      "program": "${workspaceFolder}/app/lib/main.dart",
+      "toolArgs": [
+        "--dart-define",
+        "ENABLE_MOCK=false",
+        "--dart-define",
+        "API_BASE_URL=http://127.0.0.1:8888"
+      ]
+    },
+     {
+      "name": "Worker App（真实服务）",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/app",
+      "program": "${workspaceFolder}/app/lib/main.dart",
+      "toolArgs": [
+        "--dart-define",
+        "ENABLE_MOCK=false",
+        "--dart-define",
+        "API_BASE_URL=https://cohereweb.xyz"
+      ]
+    },
+    {
+      "name": "Worker App（Mock）",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/app",
+      "program": "${workspaceFolder}/app/lib/main.dart",
+      "toolArgs": [
+        "--dart-define",
+        "ENABLE_MOCK=true"
+      ]
+    }
+  ]
+}
