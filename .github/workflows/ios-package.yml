@@ -45,10 +45,6 @@ jobs:
       VERSION_NUMBER: ${{ inputs.version_number }}
       # Supplies the unique CFBundleVersion required for App Store uploads.
       BUILD_NUMBER: ${{ inputs.build_number }}
-      # Stores the temporary archive outside the checked-out repository.
-      ARCHIVE_PATH: ${{ runner.temp }}/CandyTalk.xcarchive
-      # Stores the exported IPA outside the checked-out repository.
-      EXPORT_PATH: ${{ runner.temp }}/CandyTalk-export
 
     steps:
       - name: Check out repository
@@ -183,6 +179,9 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Stores the archive outside the checked-out repository for this runner.
+          ARCHIVE_PATH="$RUNNER_TEMP/CandyTalk.xcarchive"
+
           xcodebuild archive \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
@@ -207,6 +206,10 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Reuses the archive produced by the preceding step on the same runner.
+          ARCHIVE_PATH="$RUNNER_TEMP/CandyTalk.xcarchive"
+          # Stores the exported IPA outside the checked-out repository.
+          EXPORT_PATH="$RUNNER_TEMP/CandyTalk-export"
           EXPORT_OPTIONS_PATH="$RUNNER_TEMP/ExportOptions.plist"
           plutil -create xml1 "$EXPORT_OPTIONS_PATH"
           /usr/libexec/PlistBuddy -c 'Add :method string app-store-connect' "$EXPORT_OPTIONS_PATH"
@@ -230,7 +233,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CandyTalk-AppStore-${{ inputs.version_number }}-${{ inputs.build_number }}
-          path: ${{ env.EXPORT_PATH }}/*.ipa
+          path: ${{ runner.temp }}/CandyTalk-export/*.ipa
           if-no-files-found: error
           retention-days: 7
 
