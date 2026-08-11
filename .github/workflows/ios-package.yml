@@ -94,12 +94,12 @@ jobs:
           # Password for the Apple Distribution P12 stored only in GitHub Secrets.
           CERTIFICATE_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
           # Base64-encoded App Store provisioning profile stored only in GitHub Secrets.
-          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_MOBILEPROVISION_BASE64 }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_APPSTORE_PROVISIONING_PROFILE_BASE64 }}
         run: |
           set -euo pipefail
 
           if [[ -z "$CERTIFICATE_BASE64" || -z "$CERTIFICATE_PASSWORD" || -z "$PROVISIONING_PROFILE_BASE64" ]]; then
-            echo "::error::IOS_P12_BASE64, IOS_P12_PASSWORD, and IOS_MOBILEPROVISION_BASE64 are required."
+            echo "::error::IOS_P12_BASE64, IOS_P12_PASSWORD, and IOS_APPSTORE_PROVISIONING_PROFILE_BASE64 are required."
             exit 1
           fi
 
