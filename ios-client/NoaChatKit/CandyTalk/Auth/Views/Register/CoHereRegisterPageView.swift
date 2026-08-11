@@ -882,7 +882,7 @@ final class CoHereRegisterPageView: UIView, UITextFieldDelegate, UITextViewDeleg
     /// - Returns: 月光语中英文品牌富文本。
     private func attributedBrandText() -> NSAttributedString {
         NSAttributedString(
-            string: "月光语 · YUEGUANGYU",
+            string: "Co here",
             attributes: [
                 .foregroundColor: UIColor.white.withAlphaComponent(0.75),
                 .font: UIFont.systemFont(ofSize: 10.5, weight: .medium),

@@ -833,7 +833,7 @@ final class CoHereLoginPageView: UIView, UITextFieldDelegate, UITextViewDelegate
     /// - Returns: 可直接显示的品牌富文本。
     private func attributedBrandText() -> NSAttributedString {
         NSAttributedString(
-            string: "月光语 · YUEGUANGYU",
+            string: "Co here",
             attributes: [
                 .kern: 2.4,
                 .foregroundColor: UIColor.white.withAlphaComponent(0.75),
