@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>image/jpeg</key>
+	<string>jpeg</string>
+	<key>image/png</key>
+	<string>png</string>
+	<key>application/msword</key>
+	<string>doc</string>
+	<key>application/vnd.openxmlformats-officedocument.wordprocessingml.document</key>
+	<string>docx</string>
+	<key>application/vnd.ms-excel</key>
+	<string>xls</string>
+	<key>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</key>
+	<string>xlsx</string>
+	<key>application/vnd.ms-powerpoint</key>
+	<string>ppt</string>
+	<key>application/vnd.openxmlformats-officedocument.presentationml.presentation</key>
+	<string>pptx</string>
+	<key>application/zip</key>
+	<string>zip</string>
+	<key>application/x-rar-compressed</key>
+	<string>rar</string>
+	<key>text/plain</key>
+	<string>txt</string>
+	<key>application/pdf</key>
+	<string>pdf</string>
+	<key>video/mp4</key>
+	<string>mp4</string>
+	<key>video/quicktime</key>
+	<string>mov</string>
+	<key>video/avi</key>
+	<string>avi</string>
+	<key>video/x-flv</key>
+	<string>flv</string>
+	<key>application/vnd.rn-realmedia</key>
+	<string>rm</string>
+	<key>application/vnd.rn-realmedia-vbr</key>
+	<string>rmvb</string>
+	<key>video/x-matroska</key>
+	<string>mkv</string>
+	<key>video/x-ms-wmv</key>
+	<string>wmv</string>
+	<key>audio/heiheihei</key>
+	<string>heiheihei</string>
+</dict>
+</plist>

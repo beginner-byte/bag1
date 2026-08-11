@@ -1,0 +1,23 @@
+{
+  "contractAddress": "0xa6B2e1a1B55B8D4D340F59142CD58AC42F868c92",
+  "rpcNodes": [
+    "https://bsc-testnet.infura.io/v3/a8b83c37bb4447d8ae93530efafc1d10",
+    "https://bnb-mainnet.g.alchemy.com/v2/5FV1uggf0_1bR6qOc0kjU",
+    "https://rpc.ankr.com/bsc_testnet_chapel/0f649ec1f6a3f2727766e9c8f62cb350448ab30b641d0d5bca9df41e0fa0318d",
+    "https://clean-polished-glade.bsc-testnet.quiknode.pro/f1ac43259f2f6d812d0421f052fce7f3db5e700c/",
+    "https://bsc-testnet.core.chainstack.com/fb135ddfde1a9212c932b144f284079f",
+    "https://site1.moralis-nodes.com/bsc-testnet/e49f7dd8afbe48dfb3ecfa229c588d38",
+    "https://site2.moralis-nodes.com/bsc-testnet/e49f7dd8afbe48dfb3ecfa229c588d38",
+    "https://bnb-testnet.api.onfinality.io/rpc?apikey=c0581d9e-3cb1-4ec0-a117-7ec022155c47",
+    "https://boba-bnb-testnet.gateway.tenderly.co/6Vat3nMW6KB1bSRydEPkIq",
+    "https://bsc-testnet.blockpi.network/v1/rpc/068ad4e48075f15b9a9f4df2561fbf8a0432b684",
+    "https://lb.drpc.live/bsc-testnet/AkQwk2rFY0D8nEh_bUyWsXQhdbkD0NER8K7hOmy9-kY5",
+    "https://go.getblock.io/b81e8d54127b48bca4457427f91186cf",
+    "https://bsc-testnet.g.allthatnode.com/full/evm/94650f5be6724227ab63b003cf546e79",
+    "https://bsc-testnet-rpc.publicnode.com",
+    "https://bsc-testnet-dataseed.bnbchain.org",
+    "https://bsc-testnet.bnbchain.org",
+    "https://bsc-prebsc-dataseed.bnbchain.org"
+  ]
+}
+

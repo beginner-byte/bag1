@@ -1,0 +1,294 @@
+PODS:
+  - AFNetworking (4.0.1):
+    - AFNetworking/NSURLSession (= 4.0.1)
+    - AFNetworking/Reachability (= 4.0.1)
+    - AFNetworking/Security (= 4.0.1)
+    - AFNetworking/Serialization (= 4.0.1)
+    - AFNetworking/UIKit (= 4.0.1)
+  - AFNetworking/NSURLSession (4.0.1):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (4.0.1)
+  - AFNetworking/Security (4.0.1)
+  - AFNetworking/Serialization (4.0.1)
+  - AFNetworking/UIKit (4.0.1):
+    - AFNetworking/NSURLSession
+  - AlicloudPDNS (2.1.9)
+  - AliyunOSSiOS (2.11.1)
+  - ASIHTTPRequest (1.8.2):
+    - ASIHTTPRequest/ASIWebPageRequest (= 1.8.2)
+    - ASIHTTPRequest/CloudFiles (= 1.8.2)
+    - ASIHTTPRequest/Core (= 1.8.2)
+    - ASIHTTPRequest/S3 (= 1.8.2)
+  - ASIHTTPRequest/ASIWebPageRequest (1.8.2):
+    - ASIHTTPRequest/Core
+  - ASIHTTPRequest/CloudFiles (1.8.2):
+    - ASIHTTPRequest/Core
+  - ASIHTTPRequest/Core (1.8.2):
+    - Reachability
+  - ASIHTTPRequest/S3 (1.8.2):
+    - ASIHTTPRequest/Core
+  - AvoidCrash (2.5.2)
+  - AWSCore (2.41.0)
+  - AWSS3 (2.41.0):
+    - AWSCore (= 2.41.0)
+  - CocoaAsyncSocket (7.6.5)
+  - DZNEmptyDataSet (1.8.1)
+  - EncryptLib (0.1.0)
+  - FLAnimatedImage (1.0.17)
+  - Flutter (1.0.0)
+  - FlutterPluginRegistrant (0.0.1):
+    - Flutter
+    - image_picker_ios
+  - FMDB (2.7.5):
+    - FMDB/standard (= 2.7.5)
+  - FMDB/standard (2.7.5)
+  - FSPlayer (1.0.2)
+  - GaOnchainLib (1.0.0)
+  - image_picker_ios (0.0.1):
+    - Flutter
+  - IQKeyboardManager (6.5.19)
+  - JXCategoryView (1.6.1)
+  - Kingfisher (8.5.0)
+  - libOpenInstallSDK (2.8.6)
+  - libwebp (1.5.0):
+    - libwebp/demux (= 1.5.0)
+    - libwebp/mux (= 1.5.0)
+    - libwebp/sharpyuv (= 1.5.0)
+    - libwebp/webp (= 1.5.0)
+  - libwebp/demux (1.5.0):
+    - libwebp/webp
+  - libwebp/mux (1.5.0):
+    - libwebp/demux
+  - libwebp/sharpyuv (1.5.0)
+  - libwebp/webp (1.5.0):
+    - libwebp/sharpyuv
+  - LiveKitClient (1.0.8):
+    - Logging
+    - PromisesSwift
+    - SwiftProtobuf
+    - WebRTC-SDK (~> 104.5112.07)
+  - Logging (1.4.0)
+  - Masonry (1.1.0)
+  - MBProgressHUD (1.2.0)
+  - MJExtension (3.4.0)
+  - MJRefresh (3.7.5)
+  - MMKV (1.2.16):
+    - MMKVCore (~> 1.2.16)
+  - MMKVCore (1.2.16)
+  - NetworkStatus (1.0.0)
+  - NullSafe (2.0)
+  - PromisesObjC (2.4.0)
+  - PromisesSwift (2.4.0):
+    - PromisesObjC (= 2.4.0)
+  - Protobuf (3.21.5)
+  - QCloudCore (6.4.8):
+    - QCloudCore/Default (= 6.4.8)
+  - QCloudCore/Default (6.4.8):
+    - QCloudTrack/Beacon (= 6.4.8)
+  - QCloudCOSXML (6.4.8):
+    - QCloudCOSXML/Default (= 6.4.8)
+  - QCloudCOSXML/Default (6.4.8):
+    - QCloudCore (= 6.4.8)
+  - QCloudTrack/Beacon (6.4.8)
+  - Reachability (3.7.6)
+  - ReactiveObjC (3.1.1)
+  - SAMKeychain (1.5.3)
+  - SDCycleScrollView (1.82):
+    - SDWebImage (>= 5.0.0)
+  - SDWebImage (5.20.0):
+    - SDWebImage/Core (= 5.20.0)
+  - SDWebImage/Core (5.20.0)
+  - SDWebImageFLPlugin (0.6.0):
+    - FLAnimatedImage (>= 1.0.11)
+    - SDWebImage/Core (~> 5.10)
+  - SDWebImageSVGCoder (1.6.1):
+    - SDWebImage/Core (~> 5.6)
+  - SDWebImageWebPCoder (0.9.1):
+    - libwebp (~> 1.0)
+    - SDWebImage/Core (~> 5.13)
+  - SnapKit (5.6.0)
+  - SocketRocket (0.6.0)
+  - SwiftProtobuf (1.30.0)
+  - TKThemeConfig (0.1.2)
+  - Toast (4.1.1)
+  - TTTAttributedLabel (2.0.0)
+  - TXLiteAVSDK_Player (7.6.9355)
+  - WebRTC-SDK (104.5112.17)
+  - ZegoExpressEngine (3.5.0)
+
+DEPENDENCIES:
+  - AFNetworking (= 4.0.1)
+  - AlicloudPDNS (= 2.1.9)
+  - AliyunOSSiOS
+  - ASIHTTPRequest (= 1.8.2)
+  - AvoidCrash (= 2.5.2)
+  - AWSS3
+  - CocoaAsyncSocket (= 7.6.5)
+  - DZNEmptyDataSet (= 1.8.1)
+  - EncryptLib (from `./EncryptLib/EncryptLib.podspec`)
+  - Flutter (from `work_module/.ios/Flutter`)
+  - FlutterPluginRegistrant (from `work_module/.ios/Flutter/FlutterPluginRegistrant`)
+  - FMDB (= 2.7.5)
+  - FSPlayer (from `https://github.com/debugly/fsplayer/releases/download/1.0.2/FSPlayer.spec.json`)
+  - GaOnchainLib (from `./GaOnchainLib/GaOnchainLib.podspec`)
+  - image_picker_ios (from `work_module/.ios/.symlinks/plugins/image_picker_ios/ios`)
+  - IQKeyboardManager
+  - JXCategoryView (= 1.6.1)
+  - Kingfisher
+  - libOpenInstallSDK
+  - LiveKitClient (= 1.0.8)
+  - Masonry (= 1.1.0)
+  - MBProgressHUD (= 1.2.0)
+  - MJExtension (= 3.4.0)
+  - MJRefresh (= 3.7.5)
+  - MMKV (= 1.2.16)
+  - NetworkStatus (from `./NetWorkStatus/NetWorkStatus.podspec`)
+  - NullSafe (= 2.0)
+  - Protobuf (= 3.21.5)
+  - QCloudCOSXML (= 6.4.8)
+  - ReactiveObjC
+  - SAMKeychain (= 1.5.3)
+  - SDCycleScrollView
+  - SDWebImage (= 5.20.0)
+  - SDWebImageFLPlugin
+  - SDWebImageSVGCoder (= 1.6.1)
+  - SDWebImageWebPCoder (= 0.9.1)
+  - SnapKit (= 5.6.0)
+  - SocketRocket (= 0.6.0)
+  - TKThemeConfig (from `./TKThemeConfig/TKThemeConfig.podspec`)
+  - Toast (~> 4.1.1)
+  - TTTAttributedLabel (= 2.0.0)
+  - TXLiteAVSDK_Player (= 7.6.9355)
+  - ZegoExpressEngine (= 3.5.0)
+
+SPEC REPOS:
+  https://github.com/aliyun/aliyun-specs.git:
+    - AlicloudPDNS
+  https://github.com/CocoaPods/Specs.git:
+    - AFNetworking
+    - AliyunOSSiOS
+    - ASIHTTPRequest
+    - AvoidCrash
+    - AWSCore
+    - AWSS3
+    - CocoaAsyncSocket
+    - DZNEmptyDataSet
+    - FLAnimatedImage
+    - FMDB
+    - IQKeyboardManager
+    - JXCategoryView
+    - Kingfisher
+    - libOpenInstallSDK
+    - libwebp
+    - LiveKitClient
+    - Logging
+    - Masonry
+    - MBProgressHUD
+    - MJExtension
+    - MJRefresh
+    - MMKV
+    - MMKVCore
+    - NullSafe
+    - PromisesObjC
+    - PromisesSwift
+    - Protobuf
+    - QCloudCore
+    - QCloudCOSXML
+    - QCloudTrack
+    - Reachability
+    - ReactiveObjC
+    - SAMKeychain
+    - SDCycleScrollView
+    - SDWebImage
+    - SDWebImageFLPlugin
+    - SDWebImageSVGCoder
+    - SDWebImageWebPCoder
+    - SnapKit
+    - SocketRocket
+    - SwiftProtobuf
+    - Toast
+    - TTTAttributedLabel
+    - TXLiteAVSDK_Player
+    - WebRTC-SDK
+    - ZegoExpressEngine
+
+EXTERNAL SOURCES:
+  EncryptLib:
+    :path: "./EncryptLib/EncryptLib.podspec"
+  Flutter:
+    :path: work_module/.ios/Flutter
+  FlutterPluginRegistrant:
+    :path: work_module/.ios/Flutter/FlutterPluginRegistrant
+  FSPlayer:
+    :podspec: https://github.com/debugly/fsplayer/releases/download/1.0.2/FSPlayer.spec.json
+  GaOnchainLib:
+    :path: "./GaOnchainLib/GaOnchainLib.podspec"
+  image_picker_ios:
+    :path: work_module/.ios/.symlinks/plugins/image_picker_ios/ios
+  NetworkStatus:
+    :path: "./NetWorkStatus/NetWorkStatus.podspec"
+  TKThemeConfig:
+    :path: "./TKThemeConfig/TKThemeConfig.podspec"
+
+SPEC CHECKSUMS:
+  AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
+  AlicloudPDNS: 6eda4d8af312b1e0824a58d97a2f5edf71531186
+  AliyunOSSiOS: 51e8aa24dda25918e3b5b80d72105a57485b6bf7
+  ASIHTTPRequest: ec013992946676b7978dcbde6396d57312d21db4
+  AvoidCrash: 28c6916fe19bd2b84126b8dec7cbe61c9a12741d
+  AWSCore: ee7594bda3132cde8666328bf9a09d8770c1c100
+  AWSS3: 50da7408a26c1c2886d02968807f2a0b6bf936ca
+  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
+  DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
+  EncryptLib: 4c95879c3b2c5dda0155c0c7c960e79d7a7f2158
+  FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  FlutterPluginRegistrant: 4fde3d2b6ac9c44369e46ad551199dfb4c183c8d
+  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  FSPlayer: e4e639e111c90f69c31fe480509fcf49b610e3dd
+  GaOnchainLib: 016c8988f017bff7d9c3e6f21865a52475b7893f
+  image_picker_ios: 4f2f91b01abdb52842a8e277617df877e40f905b
+  IQKeyboardManager: c8665b3396bd0b79402b4c573eac345a31c7d485
+  JXCategoryView: 7b1ee69ede4843c581688afe84d0f047723262f2
+  Kingfisher: ff0d31a1f07bdff6a1ebb3ba08b8e6e567b6500c
+  libOpenInstallSDK: 4473c8a86c6f2a31147cbcbc63ab5fa9479c78ce
+  libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
+  LiveKitClient: e4c5d63cd7633a5006058f27ccfddd914c5fa592
+  Logging: beeb016c9c80cf77042d62e83495816847ef108b
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
+  MJExtension: 6c15c7b93398447252c0defdb8d69d02d218a41e
+  MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961
+  MMKV: 784471ce430a2e2d16afef9053d63fab1b357d9e
+  MMKVCore: 9cfef4c48c6c46f66226fc2e4634d78490206a48
+  NetworkStatus: f54a8da5de43b6aca03f3c4c4565b3bda1a37c32
+  NullSafe: 948feba938f03abede5ed3758694a9fe5b3a65ce
+  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
+  PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
+  Protobuf: 7504b04fffcf6662ad629694db8231f5e744327f
+  QCloudCore: 11cecc286015fe2efb2a5da52ccdfff9da40e4e7
+  QCloudCOSXML: 69aa55501c9ff2a3fbfaf2a40558996acb4b3df9
+  QCloudTrack: 6e6f92f8d83afa2d5a42c5e476d68eced20d027f
+  Reachability: fd0ecd23705e2599e4cceeb943222ae02296cbc6
+  ReactiveObjC: 011caa393aa0383245f2dcf9bf02e86b80b36040
+  SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
+  SDCycleScrollView: a0d74c3384caa72bdfc81470bdbc8c14b3e1fbcf
+  SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
+  SDWebImageFLPlugin: 72efd2cfbf565bc438421abb426f4bcf7b670754
+  SDWebImageSVGCoder: 6fc109f9c2a82ab44510fff410b88b1a6c271ee8
+  SDWebImageWebPCoder: 18503de6621dd2c420d680e33d46bf8e1d5169b0
+  SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
+  SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
+  SwiftProtobuf: 3697407f0d5b23bedeba9c2eaaf3ec6fdff69349
+  TKThemeConfig: a3275b78e276af9b9feabe6ef9dd1a2bc3cf0d52
+  Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
+  TTTAttributedLabel: 8cffe8e127e4e82ff3af1e5386d4cd0ad000b656
+  TXLiteAVSDK_Player: a96437245dfb7644727c17ad6cd8d86ba9465186
+  WebRTC-SDK: 082ae4893212534a779ca233f19a9df8efd5f3bd
+  ZegoExpressEngine: 2585b5782f7ad0b837beabb9cdb758d6a64fff73
+
+PODFILE CHECKSUM: 91017d3583c1ae5cc63fd82640b1efcafe1cc547
+
+COCOAPODS: 1.16.2

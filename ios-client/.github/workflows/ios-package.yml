@@ -1,0 +1,217 @@
+name: iOS Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_number:
+        description: App version, for example 1.2.0
+        required: true
+        default: "1.2.0"
+        type: string
+      build_number:
+        description: Unique App Store build number
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Build App Store IPA
+    runs-on: macos-26-intel
+    timeout-minutes: 90
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.0.1.app/Contents/Developer
+      COCOAPODS_VERSION: 1.16.2
+      WORKSPACE: CIMSDK.xcworkspace
+      SCHEME: CandyTalk
+      VERSION_NUMBER: ${{ inputs.version_number }}
+      BUILD_NUMBER: ${{ inputs.build_number }}
+      ARCHIVE_PATH: ${{ runner.temp }}/CandyTalk.xcarchive
+      EXPORT_PATH: ${{ runner.temp }}/export
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Validate package metadata
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version number must use the format 1.2.0"
+            exit 1
+          fi
+
+          if [[ ! "$BUILD_NUMBER" =~ ^[0-9]+(\.[0-9]+){0,2}$ ]]; then
+            echo "::error::Build number must contain one to three dot-separated integers"
+            exit 1
+          fi
+
+      - name: Install CocoaPods dependencies
+        run: |
+          set -euo pipefail
+
+          if ! gem list --installed cocoapods --version "$COCOAPODS_VERSION" >/dev/null; then
+            gem install cocoapods --version "$COCOAPODS_VERSION" --no-document
+          fi
+
+          pod "_${COCOAPODS_VERSION}_" install --repo-update
+
+      - name: Import signing certificate and provisioning profile
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_APPSTORE_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$CERTIFICATE_BASE64" ]]; then
+            echo "::error::Missing secret IOS_DISTRIBUTION_CERTIFICATE_BASE64"
+            exit 1
+          fi
+
+          if [[ -z "$CERTIFICATE_PASSWORD" ]]; then
+            echo "::error::Missing secret IOS_DISTRIBUTION_CERTIFICATE_PASSWORD"
+            exit 1
+          fi
+
+          if [[ -z "$PROVISIONING_PROFILE_BASE64" ]]; then
+            echo "::error::Missing secret IOS_APPSTORE_PROVISIONING_PROFILE_BASE64"
+            exit 1
+          fi
+
+          CERTIFICATE_PATH="$RUNNER_TEMP/distribution.p12"
+          PROFILE_SOURCE_PATH="$RUNNER_TEMP/profile.mobileprovision"
+          PROFILE_PLIST_PATH="$RUNNER_TEMP/profile.plist"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 32)"
+
+          printf '%s' "$CERTIFICATE_BASE64" | base64 -D > "$CERTIFICATE_PATH"
+          printf '%s' "$PROVISIONING_PROFILE_BASE64" | base64 -D > "$PROFILE_SOURCE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" \
+            -P "$CERTIFICATE_PASSWORD" \
+            -A \
+            -t cert \
+            -f pkcs12 \
+            -k "$KEYCHAIN_PATH"
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+
+          SIGNING_IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | awk 'NR == 1 { print $2 }')"
+          if [[ ! "$SIGNING_IDENTITY" =~ ^[[:xdigit:]]{40}$ ]]; then
+            echo "::error::No valid code-signing identity was found in the P12 certificate"
+            exit 1
+          fi
+
+          security cms -D -i "$PROFILE_SOURCE_PATH" > "$PROFILE_PLIST_PATH"
+          PROFILE_UUID="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$PROFILE_PLIST_PATH")"
+          PROFILE_NAME="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$PROFILE_PLIST_PATH")"
+          TEAM_ID="$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$PROFILE_PLIST_PATH")"
+          APP_IDENTIFIER="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$PROFILE_PLIST_PATH")"
+          BUNDLE_ID="${APP_IDENTIFIER#*.}"
+
+          if [[ -z "$PROFILE_UUID" || -z "$PROFILE_NAME" || -z "$TEAM_ID" || -z "$BUNDLE_ID" ]]; then
+            echo "::error::The provisioning profile is missing required signing information"
+            exit 1
+          fi
+
+          if /usr/libexec/PlistBuddy -c 'Print :ProvisionedDevices' "$PROFILE_PLIST_PATH" >/dev/null 2>&1; then
+            echo "::error::The provisioning profile contains registered devices and is not an App Store profile"
+            exit 1
+          fi
+
+          PROVISIONS_ALL_DEVICES="$(/usr/libexec/PlistBuddy -c 'Print :ProvisionsAllDevices' "$PROFILE_PLIST_PATH" 2>/dev/null || true)"
+          if [[ "$PROVISIONS_ALL_DEVICES" == "true" ]]; then
+            echo "::error::An enterprise provisioning profile cannot be used for App Store distribution"
+            exit 1
+          fi
+
+          INSTALLED_PROFILE_PATH="$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+          mkdir -p "$(dirname "$INSTALLED_PROFILE_PATH")"
+          cp "$PROFILE_SOURCE_PATH" "$INSTALLED_PROFILE_PATH"
+
+          printf 'SIGNING_IDENTITY=%s\n' "$SIGNING_IDENTITY" >> "$GITHUB_ENV"
+          printf 'PROFILE_NAME=%s\n' "$PROFILE_NAME" >> "$GITHUB_ENV"
+          printf 'TEAM_ID=%s\n' "$TEAM_ID" >> "$GITHUB_ENV"
+          printf 'BUNDLE_ID=%s\n' "$BUNDLE_ID" >> "$GITHUB_ENV"
+          printf 'INSTALLED_PROFILE_PATH=%s\n' "$INSTALLED_PROFILE_PATH" >> "$GITHUB_ENV"
+
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+      - name: Archive application
+        run: |
+          set -euo pipefail
+
+          xcodebuild archive \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$ARCHIVE_PATH" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \
+            MARKETING_VERSION="$VERSION_NUMBER" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
+
+          ARCHIVE_BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleIdentifier' "$ARCHIVE_PATH/Info.plist")"
+          if [[ "$ARCHIVE_BUNDLE_ID" != "$BUNDLE_ID" ]]; then
+            echo "::error::Archive bundle ID $ARCHIVE_BUNDLE_ID does not match provisioning profile bundle ID $BUNDLE_ID"
+            exit 1
+          fi
+
+      - name: Export IPA
+        run: |
+          set -euo pipefail
+
+          EXPORT_OPTIONS_PATH="$RUNNER_TEMP/ExportOptions.plist"
+          plutil -create xml1 "$EXPORT_OPTIONS_PATH"
+          /usr/libexec/PlistBuddy -c 'Add :method string app-store-connect' "$EXPORT_OPTIONS_PATH"
+          /usr/libexec/PlistBuddy -c 'Add :destination string export' "$EXPORT_OPTIONS_PATH"
+          /usr/libexec/PlistBuddy -c 'Add :signingStyle string manual' "$EXPORT_OPTIONS_PATH"
+          /usr/libexec/PlistBuddy -c "Add :teamID string $TEAM_ID" "$EXPORT_OPTIONS_PATH"
+          /usr/libexec/PlistBuddy -c "Add :signingCertificate string $SIGNING_IDENTITY" "$EXPORT_OPTIONS_PATH"
+          /usr/libexec/PlistBuddy -c 'Add :stripSwiftSymbols bool true' "$EXPORT_OPTIONS_PATH"
+          /usr/libexec/PlistBuddy -c 'Add :uploadSymbols bool true' "$EXPORT_OPTIONS_PATH"
+          /usr/libexec/PlistBuddy -c 'Add :manageAppVersionAndBuildNumber bool false' "$EXPORT_OPTIONS_PATH"
+          /usr/libexec/PlistBuddy -c 'Add :provisioningProfiles dict' "$EXPORT_OPTIONS_PATH"
+          /usr/libexec/PlistBuddy -c "Add :provisioningProfiles:$BUNDLE_ID string $PROFILE_NAME" "$EXPORT_OPTIONS_PATH"
+
+          mkdir -p "$EXPORT_PATH"
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportPath "$EXPORT_PATH" \
+            -exportOptionsPlist "$EXPORT_OPTIONS_PATH"
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v7
+        with:
+          name: CandyTalk-AppStore-${{ env.VERSION_NUMBER }}-${{ env.BUILD_NUMBER }}
+          path: ${{ env.EXPORT_PATH }}/*.ipa
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Clean up signing files
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
+
+          if [[ -n "${INSTALLED_PROFILE_PATH:-}" ]]; then
+            rm -f "$INSTALLED_PROFILE_PATH"
+          fi
+
+          rm -f \
+            "$RUNNER_TEMP/distribution.p12" \
+            "$RUNNER_TEMP/profile.mobileprovision" \
+            "$RUNNER_TEMP/profile.plist" \
+            "$RUNNER_TEMP/ExportOptions.plist"

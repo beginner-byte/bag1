@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Modified: 2025-11-27, Version: 2.0, Optimization: IPA Similarity Reduction -->
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="app-optimization" content="version-2.0-build-20251127">
+  <style>
+    body {
+      background-color: transparent;
+      margin: 1;
+      padding: 1;
+    }
+  </style>
+  <title>验证码接入</title>
+  <!-- 验证码程序依赖(必须)。请勿修改以下程序依赖，如通过其他手段规避加载，会导致验证码无法正常更新，对抗能力无法保证，甚至引起误拦截。 -->
+  <script src="https://ca.turing.captcha.qcloud.com/TCaptcha-global.js"></script>
+</head>
+
+<body>
+
+  <script type="text/javascript">
+    // Optimization: Modified 2025-11-27 for IPA similarity reduction
+    function globalCallback(res) {
+      if (window.webkit && window.webkit.messageHandlers) {
+        window.webkit.messageHandlers.iosJSBridge.postMessage(JSON.stringify(res));
+      }
+    }
+    // 验理
+    function errorCallback() {
+      globalCallback({
+        ret: -1,
+        randstr: '@' + Math.random().toString(36).substr(2),
+        ticket: '',
+        errorCode: 1001,
+        errorMessage: 'jsload_error',
+      });
+    }
+    window.onload = function () {
+      try {
+        const sdkOptions = {
+          needFeedBack: false,
+          enableDarkMode: false,
+          // 是否关闭loading动画并且关闭mask蒙层
+          loading: false,
+          ready: function (size) {
+            console.log('ready size:', JSON.stringify(size));
+          }
+        };
+        const captcha = new TencentCaptcha('189974576', globalCallback, sdkOptions);
+        // 调用方法，显示验证码
+        captcha.show();
+      } catch (error) {
+        errorCallback();
+      }
+    }
+
+  </script>
+
+</body>
+
+</html>

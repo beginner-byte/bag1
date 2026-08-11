@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Modified: 2025-11-27, Optimization: IPA Similarity Reduction -->
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="app-optimization" content="version-2.0-build-20251127">
+    <title>Web前端示例</title>
+    <script type="text/javascript" src="https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js"></script>
+    <style>
+        body {
+           position: relative;
+           height: 100vh;
+        }
+        #captcha-element {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+<div id="captcha-element"></div>
+<div id="button" class="login-btn"></div>
+
+<script>
+      var captcha;
+      // 弹出式
+      // Optimization: Modified 2025-11-27 for IPA similarity reduction
+      window.initAliyunCaptcha({
+        SceneId: '13x06ri0x', // 场景ID。根据步骤二新建验证场景后，您可以在验证码场景列表，获取该场景的场景ID
+        prefix: 'xxslmpl', // 身份标。开通阿里云验证码2.0后，您可以在控制台概览页面的实例基本信息卡片区域，获取身份标
+        mode: 'embed', // 验证码模式。popup表示要集成的验证码模式为弹出式。无需修改
+        immediate: true,
+        element: '#captcha-element', //页面上预留的渲染验证码的元素，与原代码中预留的页面元素保持一致。
+        button: '#button', // 触发验证码弹窗的元素。button表示单击登录按钮后，触发captchaVerifyCallback函数。您可以根据实际使用的元素修改element的值
+        captchaVerifyCallback: captchaVerifyCallback, // 业务请求(带验证码校验)回调函数，无需修改
+        onBizResultCallback: onBizResultCallback, // 业务请求结果回调函数，无需修改
+        getInstance: getInstance, // 绑定验证码实例函数，无需修改
+        slideStyle: {
+          width: 360,
+          height: 39,
+        }, // 滑idth最小值为320 px
+        language: 'cn', // 验证码语言类型，支持简体中文（cn）、繁体中文（tw）、英文（en）
+        region: 'sgp',
+      });
+
+        // 绑定验证码实例函数。该函数为固定写法，无需修改
+        function getInstance(instance) {
+            captcha = instance;
+            document.getElementById('button').click();
+        }
+    
+      // 业务请求(带验证码校验)回调函数
+      /**
+      * @name captchaVerifyCallback
+      * @function
+     
+      * 返回参数：字段名固定，captchaResult为必选；如无业务验证场景时，bizResult为可选
+      * @returns {{captchaResult: boolean, bizResult?: boolean|undefined}}
+      */
+      // 使用async函数来调用sendMessageToNative，并等待原生代码的回复
+      async function captchaVerifyCallback(captchaVerifyParam) {
+        // 1.调用sendMessageToNative方法获取验证结果
+          let result = {};
+          try {
+            console.log(captchaVerifyParam);
+            result = await sendMessageToNative('getVerifyResult', captchaVerifyParam);
+            console.log('iOS返回的验证结果:', result);
+          } catch (error) {
+            console.error('发生错误:', error);
+            // 错误处理/兼容逻辑
+            result = {
+              captchaVerifyResult: false,
+              bizResult: false,
+            };
+          }
+          // 如果是在App侧执行验证码是否通过/业务验证是否通过逻辑，则不需要下面的返回值，直接关闭H5即可
+          const verifyResult = {
+            captchaResult: result.captchaResult, // 验证码验证是否通过，boolean类型，必选
+            bizResult: result.bizReuslt, // 业务验证是否通过，boolean类型，可选；若为无业务验证结果的场景，bizResult可以为空
+          };
+
+          return verifyResult;
+      }
+
+      // 业务请求验证结果回调函数
+      function onBizResultCallback(bizResult) {
+        if (bizResult === true) {
+          // 如果业务验证通过，关闭webview
+          window.testInterface && window.testInterface.closeWebView();
+        } else {
+          // 如果业务验证不通过，给出不通过提示。此处不通过提示为业务验证不通过！
+          alert('业务验证失败');
+        }
+      }
+
+      async function sendMessageToNative(action, data) {
+          return new Promise((resolve, reject) => {
+            // 创建一个唯一的回调函数名称
+            const callbackName = 'cb_' + Math.random().toString(36).substring(2);
+
+            // 将回调函数挂载到window对象上，以便原生代码可以调用
+            window[callbackName] = (response) => {
+              resolve(JSON.parse(response)); // 注意格式转换
+              // 移除挂载的回调函数，避免内存泄露
+              delete window[callbackName];
+            };
+
+            console.log(action, data, window.webkit);
+            // 调用Java定义的JavaScript接口，发送消息给原生代码
+            window.webkit && window.webkit.messageHandlers[action].postMessage(JSON.stringify({
+              data: data,
+              callback: callbackName
+            }));
+          });
+      }
+    </script>
+</body>
+</html>

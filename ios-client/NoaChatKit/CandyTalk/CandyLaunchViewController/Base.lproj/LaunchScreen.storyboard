@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Launch View Controller-->
+        <scene sceneID="EHf-IW-A2E">
+            <objects>
+                <viewController id="01J-lp-oVM" customClass="NILaunchViewController" sceneMemberID="viewController">
+                    <view key="view" tag="100" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="Jth-iv-npP">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="img_login_logo" translatesAutoresizingMaskIntoConstraints="NO" id="0sM-qj-vVO">
+                                <rect key="frame" x="136.66666666666666" y="155" width="119.99999999999997" height="120"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="120" id="64o-BO-kux"/>
+                                    <constraint firstAttribute="width" constant="120" id="aTP-jR-vAd"/>
+                                </constraints>
+                            </imageView>
+                            <view hidden="YES" alpha="0.0" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="opt-launch-view">
+                                <rect key="frame" x="0.0" y="59" width="1" height="1"/>
+                                <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="opt-launch-h"/>
+                                    <constraint firstAttribute="width" constant="1" id="opt-launch-w"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="hU6-1Q-8kT"/>
+                        <color key="backgroundColor" red="0.97999999999999998" green="0.97999999999999998" blue="0.97999999999999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="hU6-1Q-8kT" firstAttribute="trailing" secondItem="Jth-iv-npP" secondAttribute="trailing" id="7l8-jl-NI2"/>
+                            <constraint firstItem="Jth-iv-npP" firstAttribute="leading" secondItem="hU6-1Q-8kT" secondAttribute="leading" id="7zN-TK-dgN"/>
+                            <constraint firstItem="Jth-iv-npP" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="A07-Q1-o3e"/>
+                            <constraint firstItem="0sM-qj-vVO" firstAttribute="top" secondItem="hU6-1Q-8kT" secondAttribute="top" constant="96.099999999999994" id="eCi-68-SiJ"/>
+                            <constraint firstItem="opt-launch-view" firstAttribute="leading" secondItem="hU6-1Q-8kT" secondAttribute="leading" id="opt-launch-c1"/>
+                            <constraint firstItem="opt-launch-view" firstAttribute="top" secondItem="hU6-1Q-8kT" secondAttribute="top" id="opt-launch-c2"/>
+                            <constraint firstAttribute="bottom" secondItem="Jth-iv-npP" secondAttribute="bottom" id="pmU-Vn-2s7"/>
+                            <constraint firstItem="0sM-qj-vVO" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="zAC-v6-PhM"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="52.671755725190835" y="374.64788732394368"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="LaunchImage" width="414" height="896"/>
+        <image name="img_login_logo" width="82" height="82"/>
+    </resources>
+</document>

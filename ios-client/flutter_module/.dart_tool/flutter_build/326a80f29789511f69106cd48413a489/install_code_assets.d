@@ -1,0 +1,1 @@
+ /Users/gemini/Desktop/Apps/Auror/ios-client/flutter_module/.dart_tool/flutter_build/326a80f29789511f69106cd48413a489/native_assets.json: 

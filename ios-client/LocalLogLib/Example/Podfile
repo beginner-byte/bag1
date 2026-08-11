@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '13.0'
+
+target 'LocalLogLib_Example' do
+  pod 'LocalLogLib', :path => '../'
+
+  target 'LocalLogLib_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

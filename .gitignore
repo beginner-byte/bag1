@@ -1,0 +1,9 @@
+# CocoaPods dependencies are restored by the packaging workflow.
+/ios-client/Pods/
+
+# Xcode and Flutter build products are generated locally or in CI.
+/ios-client/build/
+/ios-client/NoaChatKit/build/
+
+# Xcode per-user workspace state must not be shared through Git.
+/ios-client/**/xcuserdata/

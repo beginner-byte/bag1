@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "cohere_qrcode_frame.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

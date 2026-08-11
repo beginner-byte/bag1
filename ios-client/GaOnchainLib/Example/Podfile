@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '13.0'
+
+target 'GaOnchainLib_Example' do
+  pod 'GaOnchainLib', :path => '../'
+
+  target 'GaOnchainLib_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

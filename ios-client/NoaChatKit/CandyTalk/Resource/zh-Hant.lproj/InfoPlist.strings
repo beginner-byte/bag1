@@ -1,0 +1,23 @@
+/*
+ Modified: 2025-11-27, Version: 2.0, Optimization: IPA Similarity Reduction
+*/
+
+/*
+  InfoPlist.strings
+  CIMKit
+
+  Created by Candy on 2023/6/15.
+  
+*/
+// 繁体中文
+"CFBundleDisplayName" = "Cohere";
+"CFBundleName" = "Cohere";
+
+"NSCameraUsageDescription" = "請點擊“好”以允許訪問。如果不允許您將無法正常使用相機進行掃碼登錄、拍攝照片、頭像、錄製視頻，以及進行視頻通話。 ";
+"NSLocationWhenInUseUsageDescription" = "請點擊“好”以允許允許訪問,以便在個人名片中訪問您的位置信息。 ";
+"NSLocationAlwaysUsageDescription" = "請點擊“好”以允許允許訪問,以便在個人名片中訪問您的位置信息。 ";
+"NSLocationWhenInUseUsageDescription" = "請點擊“好”以允許允許訪問,以便在個人名片中訪問您的位置信息。 ";
+"NSMicrophoneUsageDescription" = "請點擊“好”以允許訪問。如果不允許，您將無法正常使用語音聊天功能。 ";
+"NSPhotoLibraryUsageDescription" = "請點擊「好」以允許存取。如果不允許您將無法選擇照片作為頭像或發送給朋友。 ";
+"NSPhotoLibraryAddUsageDescription" = "請點擊“好”以允許訪問。如果不允許，您將無法把您想要下載的圖片保存到手機相冊。 ";
+"NSLocalNetworkUsageDescription" = "請點選“好”以允許存取本機網路以便與裝置通訊。 ";

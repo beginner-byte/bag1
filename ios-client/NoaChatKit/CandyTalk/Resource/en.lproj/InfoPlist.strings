@@ -1,0 +1,23 @@
+/*
+ Modified: 2025-11-27, Version: 2.0, Optimization: IPA Similarity Reduction
+*/
+
+/*
+  InfoPlist.strings
+  CIMKit
+
+  Created by Candy on 2023/6/15.
+  
+*/
+// 英文
+"CFBundleDisplayName" = "Cohere";
+"CFBundleName" = "Cohere";
+
+"NSCameraUsageDescription" = "Please tap 'OK' to allow access. If you do not allow it, you will not be able to use the camera to scan code to log in, take photos, avatars, record videos, or make video calls. ";
+"NSLocationWhenInUseUsageDescription" = "Please tap “OK” to allow access to your location information in your personal business card. ";
+"NSLocationAlwaysUsageDescription" = "Please tap “OK” to allow access to your location information in your personal business card. ";
+"NSLocationWhenInUseUsageDescription" = "Please tap “OK” to allow access to your location information in your personal business card. ";
+"NSMicrophoneUsageDescription" = "Please tap “OK” to allow access. If it is not allowed, you will not be able to use the voice chat function properly. ";
+"NSPhotoLibraryUsageDescription" = "Please tap 'OK' to allow access. If you don't, you won't be able to select photos as avatars or send them to friends. ";
+"NSPhotoLibraryAddUsageDescription" = "Please tap “OK” to allow access. If not, you will not be able to save the pictures you want to download to the phone album. ";
+"NSLocalNetworkUsageDescription" = "Tap OK to allow access to the local network to communicate with the device. ";

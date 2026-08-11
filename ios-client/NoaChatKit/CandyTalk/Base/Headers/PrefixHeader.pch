@@ -1,0 +1,83 @@
+//
+//  PrefixHeader.pch
+//  NoaKit
+//
+//  Created by Candy on 2026/8/30.
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+
+/** 宏定义相关 */
+#import "NoaMacroHeader.h"
+/** Categorys */
+#import "NoaCategoryHeader.h"
+/** 枚举 */
+#import "NoaEnumHeader.h"
+/** 颜色 */
+#import "NoaColorHeader.h"
+#import "YYText.h"
+/** 工具类 */
+//域名、端口号相关
+#import "NoaUrlHostManager.h"
+//获取和设备相关的
+#import "NoaDeviceTool.h"
+//用户信息
+#import "NoaUserManager.h"
+//多语言切换
+#import "NoaLanguageManager.h"
+//缓存
+#import "NoaWebCacheManager.h"
+
+//主题切换相关
+#import <TKThemeConfig/TKThemeConfig.h>
+//Toast提醒
+#import "NoaHUDManager.h"
+//错误码
+#import "NoaHttpResponse.h"
+
+/** 自定义View */
+//从底部弹出的弹窗
+#import "NoaPresentView.h"
+
+/** Model */
+#import "NoaUserModel.h"
+#import "NoaSsoInfoModel.h"
+
+
+#import "MMKV.h"
+
+/** 第三方 */
+//键盘
+#import <IQKeyboardManager/IQKeyboardManager.h>
+//布局
+#import <Masonry/Masonry.h>
+//数据加载
+#import <MJRefresh/MJRefresh.h>
+//图片加载
+#import <SDWebImage/SDWebImage.h>
+//MJ - 数据映射为Model
+#import "MJExtension/MJExtension.h"
+
+//即时通讯SDK
+#import <NoaChatCore/NoaIMSDKCore.h>
+
+//图片扩展类
+#import "UIImage+YYImageHelper.h"
+//xor加密管理
+#import "NoaEncryptManager.h"
+
+#import "NoaToolManager.h"
+
+#import "YYText.h"
+
+/** swift*/
+#import "NoaChatKit-Swift.h"
+
+#import <ReactiveObjC/ReactiveObjC.h>
+
+#import <NetworkStatus/NetworkStatus-Swift.h>
+
+#import <EncryptLib/EncryptManager.h>
+
+#endif /* PrefixHeader_pch */

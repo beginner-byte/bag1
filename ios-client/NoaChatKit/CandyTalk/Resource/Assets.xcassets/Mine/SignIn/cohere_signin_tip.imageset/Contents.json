@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "cohere_signin_tip.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
