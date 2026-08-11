@@ -190,7 +190,7 @@ jobs:
             -archivePath "$ARCHIVE_PATH" \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$TEAM_ID" \
-            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            CANDYTALK_PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
             CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \
             OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db" \
             MARKETING_VERSION="$VERSION_NUMBER" \
