@@ -212,6 +212,7 @@ jobs:
             OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db" \
             MARKETING_VERSION="$VERSION_NUMBER" \
             CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=YES \
             2>&1 | tee "$ARCHIVE_LOG_PATH"
 
           ARCHIVE_BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleIdentifier' "$ARCHIVE_PATH/Info.plist")"
@@ -334,6 +335,15 @@ jobs:
               exit 1
             fi
           done < <(find "$VALIDATION_PATH/Payload" -type f -name 'libswift*.dylib' -print)
+
+          # Reject a package when SwiftSupport contains a runtime library that Xcode did not embed in the application.
+          while IFS= read -r SWIFT_SUPPORT_LIBRARY_PATH; do
+            SWIFT_LIBRARY_NAME="$(basename "$SWIFT_SUPPORT_LIBRARY_PATH")"
+            if [[ ! -f "$APP_PATH/Frameworks/$SWIFT_LIBRARY_NAME" ]]; then
+              echo "::error::$SWIFT_LIBRARY_NAME exists in SwiftSupport/iphoneos but is missing from CandyTalk.app/Frameworks."
+              exit 1
+            fi
+          done < <(find "$SWIFT_SUPPORT_PATH" -maxdepth 1 -type f -name 'libswift*.dylib' -print)
 
           REBUILT_IPA_PATH="$RUNNER_TEMP/CandyTalk-with-SwiftSupport.ipa"
           (
