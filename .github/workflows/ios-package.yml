@@ -38,7 +38,7 @@ jobs:
       # Matches the CocoaPods version used by the current iOS workspace.
       COCOAPODS_VERSION: "1.16.2"
       # Uses a stable runner-local location so the CocoaPods gem can be restored from cache.
-      GEM_HOME: ${{ runner.temp }}/cocoapods-gems
+      GEM_HOME: ${{ github.workspace }}/.cocoapods-gems
       # Identifies the CocoaPods workspace that contains the CandyTalk application.
       WORKSPACE: CIMSDK.xcworkspace
       # Identifies the shared application scheme enabled for Release archives.
