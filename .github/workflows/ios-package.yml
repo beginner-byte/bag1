@@ -37,6 +37,8 @@ jobs:
       FLUTTER_VERSION: "3.44.4"
       # Matches the CocoaPods version used by the current iOS workspace.
       COCOAPODS_VERSION: "1.16.2"
+      # Uses a stable runner-local location so the CocoaPods gem can be restored from cache.
+      GEM_HOME: ${{ runner.temp }}/cocoapods-gems
       # Identifies the CocoaPods workspace that contains the CandyTalk application.
       WORKSPACE: CIMSDK.xcworkspace
       # Identifies the shared application scheme enabled for Release archives.
@@ -77,6 +79,17 @@ jobs:
           set -euo pipefail
           flutter pub get
 
+      - name: Restore CocoaPods caches
+        uses: actions/cache@v4
+        with:
+          # Reuses the pinned CocoaPods gem, spec repositories, downloaded artifacts, and installed Pods.
+          path: |
+            ${{ env.GEM_HOME }}
+            ~/.cocoapods/repos
+            ~/Library/Caches/CocoaPods
+            ios-client/Pods
+          key: ${{ runner.os }}-${{ runner.arch }}-cocoapods-${{ env.COCOAPODS_VERSION }}-${{ hashFiles('ios-client/Podfile.lock', 'ios-client/work_module/pubspec.lock') }}
+
       - name: Install CocoaPods dependencies
         run: |
           set -euo pipefail
@@ -85,7 +98,7 @@ jobs:
             gem install cocoapods --version "$COCOAPODS_VERSION" --no-document
           fi
 
-          pod "_${COCOAPODS_VERSION}_" install --repo-update
+          "$GEM_HOME/bin/pod" "_${COCOAPODS_VERSION}_" install
 
       - name: Import Ad Hoc signing assets
         env:
