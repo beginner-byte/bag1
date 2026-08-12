@@ -181,6 +181,10 @@ jobs:
 
           # Stores the archive outside the checked-out repository for this runner.
           ARCHIVE_PATH="$RUNNER_TEMP/CandyTalk.xcarchive"
+          # Preserves Xcode's structured diagnostics when archive fails on the hosted runner.
+          ARCHIVE_RESULT_BUNDLE_PATH="$RUNNER_TEMP/CandyTalk-archive.xcresult"
+          # Preserves the complete archive output because the GitHub log viewer may omit compiler diagnostics.
+          ARCHIVE_LOG_PATH="$RUNNER_TEMP/CandyTalk-archive.log"
 
           xcodebuild archive \
             -workspace "$WORKSPACE" \
@@ -188,19 +192,32 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath "$ARCHIVE_PATH" \
+            -resultBundlePath "$ARCHIVE_RESULT_BUNDLE_PATH" \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$TEAM_ID" \
             CANDYTALK_PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
             CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \
             OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db" \
             MARKETING_VERSION="$VERSION_NUMBER" \
-            CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            2>&1 | tee "$ARCHIVE_LOG_PATH"
 
           ARCHIVE_BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleIdentifier' "$ARCHIVE_PATH/Info.plist")"
           if [[ "$ARCHIVE_BUNDLE_ID" != "$BUNDLE_ID" ]]; then
             echo "::error::Archive bundle ID $ARCHIVE_BUNDLE_ID does not match provisioning profile bundle ID $BUNDLE_ID."
             exit 1
           fi
+
+      - name: Upload archive failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CandyTalk-Archive-Diagnostics-${{ inputs.version_number }}-${{ inputs.build_number }}
+          path: |
+            ${{ runner.temp }}/CandyTalk-archive.log
+            ${{ runner.temp }}/CandyTalk-archive.xcresult
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Export Ad Hoc IPA
         run: |
