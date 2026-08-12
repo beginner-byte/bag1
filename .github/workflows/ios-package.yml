@@ -212,7 +212,6 @@ jobs:
             OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db" \
             MARKETING_VERSION="$VERSION_NUMBER" \
             CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
-            ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=YES \
             2>&1 | tee "$ARCHIVE_LOG_PATH"
 
           ARCHIVE_BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleIdentifier' "$ARCHIVE_PATH/Info.plist")"
