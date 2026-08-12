@@ -149,6 +149,20 @@ end
 post_install do |installer|
   # 应用 Flutter 引擎和插件要求的 iOS 构建设置。
   flutter_post_install(installer)
+
+  # Reachability 3.7.6 引用了 Xcode 26 禁止模块外访问的 netinet6 私有头文件。
+  # 该 Pod 未使用此头文件中的声明，移除引用后继续使用公开的 netinet/in.h。
+  reachability_source = File.join(installer.sandbox.root.to_s, 'Reachability', 'Reachability.m')
+  if File.exist?(reachability_source)
+    source = File.read(reachability_source)
+    private_header_import = "#import <netinet6/in6.h>\n"
+    if source.include?(private_header_import)
+      # CocoaPods 缓存恢复的源码可能是只读文件，仅为当前生成副本补充 owner-write 权限。
+      File.chmod(File.stat(reachability_source).mode | 0o200, reachability_source)
+      File.write(reachability_source, source.sub(private_header_import, ''))
+    end
+  end
+
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
