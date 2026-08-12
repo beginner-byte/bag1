@@ -301,15 +301,31 @@ jobs:
           SWIFT_SUPPORT_PATH="$VALIDATION_PATH/SwiftSupport/iphoneos"
           mkdir -p "$SWIFT_SUPPORT_PATH"
           SWIFT_STDLIB_ARGUMENTS=(
-            --copy
+            --print
             --platform iphoneos
             --scan-executable "$APP_EXECUTABLE_PATH"
-            --unsigned-destination "$SWIFT_SUPPORT_PATH"
           )
           if [[ -d "$APP_PATH/Frameworks" ]]; then
             SWIFT_STDLIB_ARGUMENTS+=(--scan-folder "$APP_PATH/Frameworks")
           fi
-          xcrun swift-stdlib-tool "${SWIFT_STDLIB_ARGUMENTS[@]}"
+
+          # Resolve libraries with Xcode, then copy pristine toolchain files without invoking its broken copy destination handling.
+          SWIFT_LIBRARY_COUNT=0
+          while IFS= read -r SWIFT_LIBRARY_PATH; do
+            if [[ -z "$SWIFT_LIBRARY_PATH" || ! -f "$SWIFT_LIBRARY_PATH" ]]; then
+              echo "::error::swift-stdlib-tool returned an invalid library path: $SWIFT_LIBRARY_PATH"
+              exit 1
+            fi
+
+            SWIFT_LIBRARY_NAME="$(basename "$SWIFT_LIBRARY_PATH")"
+            cp "$SWIFT_LIBRARY_PATH" "$SWIFT_SUPPORT_PATH/$SWIFT_LIBRARY_NAME"
+            SWIFT_LIBRARY_COUNT=$((SWIFT_LIBRARY_COUNT + 1))
+          done < <(xcrun swift-stdlib-tool "${SWIFT_STDLIB_ARGUMENTS[@]}")
+
+          if [[ "$SWIFT_LIBRARY_COUNT" -eq 0 ]]; then
+            echo "::error::No required Swift runtime libraries were resolved."
+            exit 1
+          fi
 
           while IFS= read -r SWIFT_LIBRARY_PATH; do
             SWIFT_LIBRARY_NAME="$(basename "$SWIFT_LIBRARY_PATH")"
