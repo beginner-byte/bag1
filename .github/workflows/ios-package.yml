@@ -18,12 +18,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: ios-client-app-store-${{ github.ref }}
+  group: ios-client-ad-hoc-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   package-ios-client:
-    name: Build CandyTalk App Store IPA
+    name: Build CandyTalk Ad Hoc IPA
     runs-on: macos-26-intel
     timeout-minutes: 90
     defaults:
@@ -45,7 +45,7 @@ jobs:
       SCHEME: CandyTalk
       # Keeps workflow inputs out of shell source so their values cannot become commands.
       VERSION_NUMBER: ${{ inputs.version_number }}
-      # Supplies the CFBundleVersion embedded in the App Store package.
+      # Supplies the CFBundleVersion embedded in the Ad Hoc package.
       BUILD_NUMBER: ${{ inputs.build_number }}
 
     steps:
@@ -100,19 +100,19 @@ jobs:
 
           "$GEM_HOME/bin/pod" "_${COCOAPODS_VERSION}_" install
 
-      - name: Import App Store signing assets
+      - name: Import Ad Hoc signing assets
         env:
           # Base64-encoded Apple Distribution P12 stored only in GitHub Secrets.
           CERTIFICATE_BASE64: ${{ secrets.IOS_P12_BASE64 }}
           # Password for the Apple Distribution P12 stored only in GitHub Secrets.
           CERTIFICATE_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
-          # Base64-encoded App Store Connect provisioning profile stored only in GitHub Secrets.
-          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_APPSTORE_PROVISIONING_PROFILE_BASE64 }}
+          # Base64-encoded Ad Hoc provisioning profile stored only in GitHub Secrets.
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_MOBILEPROVISION_BASE64 }}
         run: |
           set -euo pipefail
 
           if [[ -z "$CERTIFICATE_BASE64" || -z "$CERTIFICATE_PASSWORD" || -z "$PROVISIONING_PROFILE_BASE64" ]]; then
-            echo "::error::IOS_P12_BASE64, IOS_P12_PASSWORD, and IOS_APPSTORE_PROVISIONING_PROFILE_BASE64 are required."
+            echo "::error::IOS_P12_BASE64, IOS_P12_PASSWORD, and IOS_MOBILEPROVISION_BASE64 are required."
             exit 1
           fi
 
@@ -160,19 +160,19 @@ jobs:
             exit 1
           fi
 
-          if /usr/libexec/PlistBuddy -c 'Print :ProvisionedDevices' "$PROFILE_PLIST_PATH" >/dev/null 2>&1; then
-            echo "::error::The provisioning profile contains registered devices and is not an App Store profile."
+          if ! /usr/libexec/PlistBuddy -c 'Print :ProvisionedDevices' "$PROFILE_PLIST_PATH" >/dev/null 2>&1; then
+            echo "::error::The provisioning profile does not contain registered devices and is not an Ad Hoc profile."
             exit 1
           fi
 
           PROVISIONS_ALL_DEVICES="$(/usr/libexec/PlistBuddy -c 'Print :ProvisionsAllDevices' "$PROFILE_PLIST_PATH" 2>/dev/null || true)"
           if [[ "$PROVISIONS_ALL_DEVICES" == "true" ]]; then
-            echo "::error::An Enterprise provisioning profile cannot be used for App Store distribution."
+            echo "::error::An Enterprise provisioning profile cannot be used for Ad Hoc distribution."
             exit 1
           fi
 
           if [[ "$(date -j -f '%a %b %d %T %Z %Y' "$PROFILE_EXPIRATION" '+%s')" -le "$(date -u '+%s')" ]]; then
-            echo "::error::The App Store provisioning profile has expired."
+            echo "::error::The Ad Hoc provisioning profile has expired."
             exit 1
           fi
 
@@ -232,7 +232,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Export App Store IPA
+      - name: Export Ad Hoc IPA
         run: |
           set -euo pipefail
 
@@ -242,8 +242,8 @@ jobs:
           EXPORT_PATH="$RUNNER_TEMP/CandyTalk-export"
           EXPORT_OPTIONS_PATH="$RUNNER_TEMP/ExportOptions.plist"
           plutil -create xml1 "$EXPORT_OPTIONS_PATH"
-          # Produces an IPA eligible for App Store Connect and TestFlight submission.
-          /usr/libexec/PlistBuddy -c 'Add :method string app-store-connect' "$EXPORT_OPTIONS_PATH"
+          # Xcode 26 uses release-testing for Ad Hoc distribution.
+          /usr/libexec/PlistBuddy -c 'Add :method string release-testing' "$EXPORT_OPTIONS_PATH"
           /usr/libexec/PlistBuddy -c 'Add :destination string export' "$EXPORT_OPTIONS_PATH"
           /usr/libexec/PlistBuddy -c 'Add :signingStyle string manual' "$EXPORT_OPTIONS_PATH"
           /usr/libexec/PlistBuddy -c "Add :teamID string $TEAM_ID" "$EXPORT_OPTIONS_PATH"
@@ -260,7 +260,7 @@ jobs:
             -exportPath "$EXPORT_PATH" \
             -exportOptionsPlist "$EXPORT_OPTIONS_PATH"
 
-      - name: Validate App Store IPA
+      - name: Add and validate SwiftSupport
         run: |
           set -euo pipefail
 
@@ -282,6 +282,8 @@ jobs:
           fi
 
           APP_PATH="${APP_PATHS[0]}"
+          APP_EXECUTABLE_NAME="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP_PATH/Info.plist")"
+          APP_EXECUTABLE_PATH="$APP_PATH/$APP_EXECUTABLE_NAME"
           EMBEDDED_PROFILE_PATH="$APP_PATH/embedded.mobileprovision"
           EMBEDDED_PROFILE_PLIST_PATH="$VALIDATION_PATH/embedded-profile.plist"
           if [[ ! -f "$EMBEDDED_PROFILE_PATH" ]]; then
@@ -290,25 +292,45 @@ jobs:
           fi
 
           security cms -D -i "$EMBEDDED_PROFILE_PATH" > "$EMBEDDED_PROFILE_PLIST_PATH"
-          if /usr/libexec/PlistBuddy -c 'Print :ProvisionedDevices' "$EMBEDDED_PROFILE_PLIST_PATH" >/dev/null 2>&1; then
-            echo "::error::The exported IPA is still signed with a device provisioning profile."
+          if ! /usr/libexec/PlistBuddy -c 'Print :ProvisionedDevices' "$EMBEDDED_PROFILE_PLIST_PATH" >/dev/null 2>&1; then
+            echo "::error::The exported IPA is not signed with the expected Ad Hoc provisioning profile."
             exit 1
           fi
 
           codesign --verify --deep --strict --verbose=2 "$APP_PATH"
 
+          SWIFT_SUPPORT_PATH="$VALIDATION_PATH/SwiftSupport/iphoneos"
+          mkdir -p "$SWIFT_SUPPORT_PATH"
+          SWIFT_STDLIB_ARGUMENTS=(
+            --copy
+            --platform iphoneos
+            --scan-executable "$APP_EXECUTABLE_PATH"
+            --unsigned-destination "$SWIFT_SUPPORT_PATH"
+          )
+          if [[ -d "$APP_PATH/Frameworks" ]]; then
+            SWIFT_STDLIB_ARGUMENTS+=(--scan-folder "$APP_PATH/Frameworks")
+          fi
+          xcrun swift-stdlib-tool "${SWIFT_STDLIB_ARGUMENTS[@]}"
+
           while IFS= read -r SWIFT_LIBRARY_PATH; do
             SWIFT_LIBRARY_NAME="$(basename "$SWIFT_LIBRARY_PATH")"
-            if [[ ! -f "$VALIDATION_PATH/SwiftSupport/iphoneos/$SWIFT_LIBRARY_NAME" ]]; then
+            if [[ ! -f "$SWIFT_SUPPORT_PATH/$SWIFT_LIBRARY_NAME" ]]; then
               echo "::error::SwiftSupport/iphoneos is missing $SWIFT_LIBRARY_NAME required by the application."
               exit 1
             fi
           done < <(find "$VALIDATION_PATH/Payload" -type f -name 'libswift*.dylib' -print)
 
+          REBUILT_IPA_PATH="$RUNNER_TEMP/CandyTalk-with-SwiftSupport.ipa"
+          (
+            cd "$VALIDATION_PATH"
+            /usr/bin/zip -qry "$REBUILT_IPA_PATH" Payload SwiftSupport
+          )
+          mv "$REBUILT_IPA_PATH" "${IPA_PATHS[0]}"
+
       - name: Upload CandyTalk IPA
         uses: actions/upload-artifact@v4
         with:
-          name: CandyTalk-AppStore-${{ inputs.version_number }}-${{ inputs.build_number }}
+          name: CandyTalk-AdHoc-${{ inputs.version_number }}-${{ inputs.build_number }}
           path: ${{ runner.temp }}/CandyTalk-export/*.ipa
           if-no-files-found: error
           retention-days: 7
