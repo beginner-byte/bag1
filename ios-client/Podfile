@@ -150,11 +150,14 @@ post_install do |installer|
   # 应用 Flutter 引擎和插件要求的 iOS 构建设置。
   flutter_post_install(installer)
 
-  # Reachability 3.7.6 与 QCloudTrack 6.4.8 引用了 Xcode 26 禁止模块外访问的 netinet6 私有头文件。
-  # 两个 Pod 均未使用此头文件中的声明，移除引用后继续使用公开的 netinet/in.h。
+  # 当前锁定的 Reachability、QCloud 与 AFNetworking 源码引用了 Xcode 26 禁止模块外访问的 netinet6 私有头文件。
+  # 删除私有 import 并保留公开的 netinet/in.h；AFNetworking 的 IPv6 逻辑仍使用公开声明继续编译。
   private_header_sources = [
     File.join(installer.sandbox.root.to_s, 'Reachability', 'Reachability.m'),
-    File.join(installer.sandbox.root.to_s, 'QCloudTrack', 'QCloudTrack', 'Classes', 'Default', 'Utils', 'QCloudTrackNetworkUtils.m')
+    File.join(installer.sandbox.root.to_s, 'QCloudTrack', 'QCloudTrack', 'Classes', 'Default', 'Utils', 'QCloudTrackNetworkUtils.m'),
+    File.join(installer.sandbox.root.to_s, 'QCloudCore', 'QCloudCore', 'Classes', 'Base', 'QCLOUDRestNet', 'reachability', 'QCloudReachability.m'),
+    File.join(installer.sandbox.root.to_s, 'AFNetworking', 'AFNetworking', 'AFNetworkReachabilityManager.m'),
+    File.join(installer.sandbox.root.to_s, 'AFNetworking', 'AFNetworking', 'AFHTTPSessionManager.m')
   ]
   private_header_sources.each do |source_path|
     next unless File.exist?(source_path)
