@@ -405,6 +405,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "taskDetailDeleteConfirmMessage": MessageLookupByLibrary.simpleMessage(
       "删除任务将同时解散关联群聊，此操作需要群主确认。",
     ),
+    "taskDetailDeleteConfirmMessageNoGroup":
+        MessageLookupByLibrary.simpleMessage("删除后无法恢复，确认删除这个任务吗？"),
     "taskDetailCancel": MessageLookupByLibrary.simpleMessage("取消"),
     "taskDetailConfirmDelete": MessageLookupByLibrary.simpleMessage("确认删除"),
     "taskDetailDeleteSuccess": MessageLookupByLibrary.simpleMessage("任务已删除"),

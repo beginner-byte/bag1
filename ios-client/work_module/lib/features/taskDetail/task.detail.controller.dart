@@ -17,7 +17,6 @@ final class TaskDetailController extends GetxController {
   bool get canAddAssignees {
     final value = task.value;
     return value != null &&
-        value.groupAction == 'waiting_members' &&
         value.creatorId == Get.find<WorkSessionService>().workerUserId;
   }
 
@@ -27,7 +26,7 @@ final class TaskDetailController extends GetxController {
     if (Get.arguments is TaskItem) task.value = Get.arguments as TaskItem;
   }
 
-  /// 选择团队内 CandyTalk 好友，追加负责人并在达到三人后静默建群。
+  /// 选择团队内 CandyTalk 好友并追加负责人，不创建任务独立群聊。
   Future<void> addAssignees() async {
     final current = task.value;
     if (!canAddAssignees || current == null) return;
@@ -48,43 +47,13 @@ final class TaskDetailController extends GetxController {
       );
       if (selectedUIDs.isEmpty) return;
       EasyLoading.show();
-      var updated = await taskRepository.addAssignees(
+      final updated = await taskRepository.addAssignees(
         taskId: current.id,
         assigneeIds: candidates
             .where((item) => selectedUIDs.contains(item.candyUserUid))
             .map((item) => item.id)
             .toList(growable: false),
       );
-      if (updated.groupAction == 'create' &&
-          updated.groupOperationId.isNotEmpty) {
-        late final TaskGroupCreationResult creation;
-        try {
-          creation = await bridge.createTaskGroup(
-            title: updated.title,
-            members: updated.assignees
-                .map(
-                  (item) => {
-                    'candyUserUid': item.candyUserUid,
-                    'name': item.name,
-                  },
-                )
-                .toList(growable: false),
-          );
-        } catch (error) {
-          task.value = await taskRepository.failTaskGroup(
-            taskId: updated.id,
-            operationId: updated.groupOperationId,
-            message: error.toString(),
-          );
-          rethrow;
-        }
-        updated = await taskRepository.bindTaskGroup(
-          taskId: updated.id,
-          groupId: creation.groupId,
-          operationId: updated.groupOperationId,
-          memberCandyUserUids: creation.memberCandyUserUids,
-        );
-      }
       task.value = updated;
       EasyLoading.dismiss();
       await Get.offNamed<void>(GetRouter.taskDetail, arguments: updated);

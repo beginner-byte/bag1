@@ -65,6 +65,40 @@ final class CoHereTaskGroupService {
         )
     }
 
+    /// Invites one CandyTalk friend into an existing team-owned group.
+    ///
+    /// - Parameters:
+    ///   - groupID: Stable group identifier already bound by Worker.
+    ///   - member: Newly joined Worker team member and CandyTalk identity.
+    ///   - completion: Main-thread SDK acceptance or a bounded failure.
+    func inviteMember(
+        groupID: String,
+        member: CoHereTaskGroupMember,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        guard let currentUserUID = NoaUserManager.sharedInstance().userInfo?.userUID,
+              !groupID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !member.userUID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              member.userUID != currentUserUID else {
+            completion(.failure(error(code: "invalid_member_invite", message: "CandyTalk member invitation is invalid")))
+            return
+        }
+        let parameters = NSMutableDictionary(dictionary: [
+            "groupId": groupID,
+            "userUid": currentUserUID,
+            "inviteDesc": "",
+            "groupMemberParams": [["userUid": member.userUID, "nickName": member.nickname]]
+        ])
+        NoaIMSDKManager.sharedTool().groupInviteFriend(
+            with: parameters,
+            onSuccess: { _, _ in DispatchQueue.main.async { completion(.success(())) } },
+            onFailure: { [weak self] code, message, _ in
+                let inviteError = self?.error(code: String(code), message: message ?? "Group member invitation failed") ?? NSError()
+                DispatchQueue.main.async { completion(.failure(inviteError)) }
+            }
+        )
+    }
+
     /// Dissolves one group as the current owner; repeated missing-group responses remain SDK-defined.
     func dissolveGroup(
         groupID: String,

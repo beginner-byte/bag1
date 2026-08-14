@@ -1,4 +1,6 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:work_module/core/host/work_host_bridge.dart';
 import 'package:work_module/core/model/user.dart';
 import 'package:work_module/core/network/auth/profile.target.dart';
 import 'package:work_module/core/network/auth/update.profile.target.dart';
@@ -6,6 +8,8 @@ import 'package:work_module/core/network/core/http.method.dart';
 import 'package:work_module/core/network/task/add.task.assignees.target.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('profile response preserves editable Worker fields', () {
     final user = User.fromJson({
       'id': 'worker-1',
@@ -47,6 +51,38 @@ void main() {
       'gender': 'unspecified',
       'birthday': '1999-01-02',
     });
+  });
+
+  test('profile bridge sends IM name and avatar bytes to CandyTalk', () async {
+    const channel = MethodChannel('test.cohere/profile');
+    MethodCall? profileCall;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          if (call.method == 'updateCurrentUserProfile') {
+            profileCall = call;
+            return {'avatarUrl': 'candy/avatar/new.jpg'};
+          }
+          return true;
+        });
+    final bridge = WorkHostBridge(channel: channel);
+    final avatarBytes = Uint8List.fromList([1, 2, 3]);
+
+    final avatarUrl = await bridge.updateCurrentUserProfile(
+      displayName: 'New IM name',
+      avatarBytes: avatarBytes,
+      avatarFileName: 'avatar.jpg',
+    );
+
+    expect(profileCall?.method, 'updateCurrentUserProfile');
+    expect(profileCall?.arguments, {
+      'displayName': 'New IM name',
+      'avatarBytes': avatarBytes,
+      'avatarFileName': 'avatar.jpg',
+    });
+    expect(avatarUrl, 'candy/avatar/new.jpg');
+    bridge.dispose();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
   });
 
   test('add task assignees target sends task and worker user ids', () {

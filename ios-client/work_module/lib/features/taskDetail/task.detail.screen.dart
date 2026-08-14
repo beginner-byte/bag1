@@ -128,32 +128,6 @@ class TaskDetailScreen extends StatelessWidget with ScreenMixin {
                   ),
                 ),
               ],
-              if (task.groupId.isNotEmpty ||
-                  (_isCreator(task) && task.groupAction == 'create')) ...[
-                SizedBox(height: 14.h),
-                _sectionCard(
-                  title: S.of(context).taskDetailGroupChat,
-                  icon: Icons.forum_outlined,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: () => task.groupId.isNotEmpty
-                          ? _openGroup(task)
-                          : _retryCreateGroup(task),
-                      icon: Icon(
-                        task.groupId.isNotEmpty
-                            ? Icons.chat_bubble_outline_rounded
-                            : Icons.group_add_outlined,
-                      ),
-                      label: Text(
-                        task.groupId.isNotEmpty
-                            ? S.of(context).taskDetailOpenGroup
-                            : S.of(context).taskDetailRetryGroup,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
               if (_isCreator(task)) ...[
                 SizedBox(height: 14.h),
                 OutlinedButton.icon(
@@ -172,50 +146,6 @@ class TaskDetailScreen extends StatelessWidget with ScreenMixin {
     );
   }
 
-  /// 打开当前任务已经绑定的原生 CandyTalk 群聊。
-  Future<void> _openGroup(TaskItem task) async {
-    try {
-      await Get.find<WorkHostBridge>().openTaskGroup(task.groupId);
-    } catch (error) {
-      EasyLoading.showError(error.toString());
-    }
-  }
-
-  /// 由任务创建人重试原生建群，绑定成功后立即进入群聊。
-  Future<void> _retryCreateGroup(TaskItem task) async {
-    if (!_isCreator(task) ||
-        task.groupAction != 'create' ||
-        task.groupOperationId.isEmpty) {
-      return;
-    }
-    try {
-      EasyLoading.show();
-      final bridge = Get.find<WorkHostBridge>();
-      final creation = await bridge.createTaskGroup(
-        title: task.title,
-        members: task.assignees
-            .map(
-              (member) => {
-                'candyUserUid': member.candyUserUid,
-                'name': member.name,
-              },
-            )
-            .where((member) => member['candyUserUid']!.isNotEmpty)
-            .toList(growable: false),
-      );
-      await TaskRepository().bindTaskGroup(
-        taskId: task.id,
-        groupId: creation.groupId,
-        operationId: task.groupOperationId,
-        memberCandyUserUids: creation.memberCandyUserUids,
-      );
-      EasyLoading.dismiss();
-      await bridge.openTaskGroup(creation.groupId);
-    } catch (error) {
-      EasyLoading.showError(error.toString());
-    }
-  }
-
   /// 判断当前 Worker 会话是否拥有任务删除权限。
   bool _isCreator(TaskItem task) {
     return task.creatorId.isNotEmpty &&
@@ -229,7 +159,11 @@ class TaskDetailScreen extends StatelessWidget with ScreenMixin {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(S.of(context).taskDetailDeleteConfirmTitle),
-        content: Text(S.of(context).taskDetailDeleteConfirmMessage),
+        content: Text(
+          task.groupId.isEmpty
+              ? S.of(context).taskDetailDeleteConfirmMessageNoGroup
+              : S.of(context).taskDetailDeleteConfirmMessage,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),

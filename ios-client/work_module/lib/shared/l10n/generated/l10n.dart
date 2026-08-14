@@ -1227,6 +1227,13 @@ class S {
     args: [],
   );
 
+  /// `This cannot be undone. Delete this task?`
+  String get taskDetailDeleteConfirmMessageNoGroup => Intl.message(
+    'This cannot be undone. Delete this task?',
+    name: 'taskDetailDeleteConfirmMessageNoGroup',
+    args: [],
+  );
+
   /// `Cancel`
   String get taskDetailCancel =>
       Intl.message('Cancel', name: 'taskDetailCancel', args: []);

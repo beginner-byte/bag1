@@ -350,6 +350,7 @@
     "taskDetailDelete": "删除任务",
     "taskDetailDeleteConfirmTitle": "删除任务？",
     "taskDetailDeleteConfirmMessage": "删除任务将同时解散关联群聊，此操作需要群主确认。",
+    "taskDetailDeleteConfirmMessageNoGroup": "删除后无法恢复，确认删除这个任务吗？",
     "taskDetailCancel": "取消",
     "taskDetailConfirmDelete": "确认删除",
     "taskDetailDeleteSuccess": "任务已删除"

@@ -145,25 +145,6 @@ final class CoHereContactViewController: CandyBaseViewController,
             )
         ]
 
-        let fileAssistantEnabled =
-            NoaUserManager.sharedInstance()
-            .userRoleAuthInfo?
-            .isShowFileAssistant
-            .configValue == "true"
-        if fileAssistantEnabled {
-            actions.append(
-                CoHereContactQuickAction(
-                    kind: .fileHelper,
-                    title: coHereLocalized("文件助手"),
-                    iconName: "acon_file",
-                    iconBackgroundColor: UIColor(
-                        coHereContactHex: 0x6C63FF
-                    ),
-                    usesTemplateIcon: true
-                )
-            )
-        }
-
         actions.append(
             contentsOf: [
                 CoHereContactQuickAction(
@@ -181,15 +162,6 @@ final class CoHereContactViewController: CandyBaseViewController,
                     iconName: "cohere_contact_group_chat",
                     iconBackgroundColor: UIColor(
                         coHereContactHex: 0xFA9D3B
-                    ),
-                    usesTemplateIcon: false
-                ),
-                CoHereContactQuickAction(
-                    kind: .groupHelper,
-                    title: coHereLocalized("群助手"),
-                    iconName: "cohere_contact_group_helper",
-                    iconBackgroundColor: UIColor(
-                        coHereContactHex: 0x3B91FA
                     ),
                     usesTemplateIcon: false
                 )

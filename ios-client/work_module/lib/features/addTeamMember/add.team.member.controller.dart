@@ -5,6 +5,7 @@ import 'package:work_module/core/model/team/team.item.model.dart';
 import 'package:work_module/core/repository/team.repository.dart';
 import 'package:work_module/core/host/work_host_bridge.dart';
 import 'package:work_module/core/service/work_session_service.dart';
+import 'package:work_module/core/service/team_group_coordinator.dart';
 import 'package:work_module/shared/l10n/generated/l10n.dart';
 
 /// 邀请成员页面控制器，负责用户搜索、成员状态判断和提交邀请请求。
@@ -23,6 +24,9 @@ class AddTeamMemberController extends GetxController {
 
   /// 原生 CandyTalk 好友选择桥。
   final WorkHostBridge hostBridge = Get.find<WorkHostBridge>();
+
+  /// 团队群共享编排器，确保第三人加入后按 Worker 指令创建群。
+  final TeamGroupCoordinator groupCoordinator = TeamGroupCoordinator();
 
   /// 用户 ID、邮箱或完整国际手机号输入控制器，生命周期跟随独立页面。
   final query = TextEditingController();
@@ -143,10 +147,15 @@ class AddTeamMemberController extends GetxController {
     try {
       final selectedUIDs = await hostBridge.selectTaskFriends(const []);
       for (final candyUserUid in selectedUIDs.toSet()) {
-        await repository.addCandyFriend(
+        final added = await repository.addCandyFriend(
           teamId: currentTeam.id,
           candyUserUid: candyUserUid,
         );
+        if (added.action == 'create') {
+          await groupCoordinator.ensureCreated(currentTeam.id);
+        } else if (added.action == 'invite_member') {
+          await groupCoordinator.drainMemberInvites(currentTeam.id);
+        }
       }
       if (selectedUIDs.isNotEmpty) {
         EasyLoading.showSuccess(S.current.teamDetailMemberAdded);

@@ -350,6 +350,7 @@
     "taskDetailDelete": "Delete task",
     "taskDetailDeleteConfirmTitle": "Delete task?",
     "taskDetailDeleteConfirmMessage": "Deleting this task will also dissolve its group chat and requires the group owner's confirmation.",
+    "taskDetailDeleteConfirmMessageNoGroup": "This cannot be undone. Delete this task?",
     "taskDetailCancel": "Cancel",
     "taskDetailConfirmDelete": "Delete",
     "taskDetailDeleteSuccess": "Task deleted"

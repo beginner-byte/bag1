@@ -558,6 +558,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "taskDetailDeleteConfirmMessage": MessageLookupByLibrary.simpleMessage(
       "Deleting this task will also dissolve its group chat and requires the group owner's confirmation.",
     ),
+    "taskDetailDeleteConfirmMessageNoGroup":
+        MessageLookupByLibrary.simpleMessage(
+          "This cannot be undone. Delete this task?",
+        ),
     "taskDetailCancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "taskDetailConfirmDelete": MessageLookupByLibrary.simpleMessage("Delete"),
     "taskDetailDeleteSuccess": MessageLookupByLibrary.simpleMessage(

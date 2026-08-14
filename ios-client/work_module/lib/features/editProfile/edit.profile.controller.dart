@@ -4,6 +4,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:work_module/core/model/user.dart';
+import 'package:work_module/core/host/work_host_bridge.dart';
 import 'package:work_module/core/repository/profile.repository.dart';
 import 'package:work_module/shared/l10n/generated/l10n.dart';
 
@@ -23,6 +24,9 @@ final class EditProfileController extends GetxController {
 
   /// 资料仓库，负责头像上传和资料保存。
   final ProfileRepository repository = ProfileRepository();
+
+  /// CandyTalk 宿主桥，用于把名字和头像写入 IM 主资料。
+  final WorkHostBridge bridge = Get.find<WorkHostBridge>();
 
   /// 路由传入的当前 Worker 用户资料。
   late final User user;
@@ -183,19 +187,21 @@ final class EditProfileController extends GetxController {
     submitting.value = true;
     canSubmit.value = false;
     try {
-      var nextAvatarUrl = avatarUrl;
+      Uint8List? avatarBytes;
       final avatar = selectedAvatar.value;
       if (avatar != null) {
-        final bytes = await avatar.readAsBytes();
-        if (bytes.length > maxAvatarBytes) {
+        avatarBytes = await avatar.readAsBytes();
+        if (avatarBytes.length > maxAvatarBytes) {
           avatarError.value = S.current.profileAvatarTooLarge;
           return;
         }
-        nextAvatarUrl = await repository.uploadAvatar(
-          bytes: bytes,
-          fileName: avatar.name,
-        );
       }
+      final imAvatarUrl = await bridge.updateCurrentUserProfile(
+        displayName: name,
+        avatarBytes: avatarBytes,
+        avatarFileName: avatar?.name,
+      );
+      final nextAvatarUrl = imAvatarUrl.isNotEmpty ? imAvatarUrl : avatarUrl;
       final updatedUser = await repository.updateProfile(
         displayName: name,
         avatarUrl: nextAvatarUrl,

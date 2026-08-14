@@ -61,6 +61,32 @@
         && navigationController.viewControllers.firstObject != self;
 }
 
+/// 判断会话是否属于新版会话页不展示的系统助手。
+/// @param session SDK 或本地数据库返回的会话模型。
+/// @return 群发助手、文件助手或每日签到返回 YES；其他会话返回 NO。
+- (BOOL)coHereShouldHideSession:(LingIMSessionModel *)session {
+    if (session == nil) {
+        return NO;
+    }
+    return session.sessionType == CIMSessionTypeMassMessage
+        || session.sessionType == CIMSessionTypeSignInReminder
+        || [session.sessionID isEqualToString:@"100002"]
+        || [session.sessionID isEqualToString:@"100003"];
+}
+
+/// 从会话快照中移除仅需隐藏的系统助手，不删除 SDK 数据库记录。
+/// @param sessions 待过滤的普通或置顶会话快照。
+/// @return 保持原顺序的可见会话数组。
+- (NSArray<LingIMSessionModel *> *)coHereVisibleSessionsFromArray:(NSArray<LingIMSessionModel *> *)sessions {
+    if (sessions.count == 0) {
+        return @[];
+    }
+    NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(LingIMSessionModel *session, NSDictionary *bindings) {
+        return ![self coHereShouldHideSession:session];
+    }];
+    return [sessions filteredArrayUsingPredicate:predicate];
+}
+
 - (void)refreshRowForSessionId:(NSString *)sessionId {
     if (sessionId.length == 0) return;
 
@@ -1714,9 +1740,9 @@
         //按照 会话ID 降序排序 次级优先级
         NSSortDescriptor *sortDescriptorSessionID = [NSSortDescriptor sortDescriptorWithKey:@"sessionID" ascending:NO];
         
-        NSMutableArray * tempSessionList = [weakSelf.sessionList.safeArray mutableCopy];
+        NSMutableArray * tempSessionList = [[weakSelf coHereVisibleSessionsFromArray:weakSelf.sessionList.safeArray] mutableCopy];
         
-        NSMutableArray * tempSessionTopList = [weakSelf.sessionTopList.safeArray mutableCopy];
+        NSMutableArray * tempSessionTopList = [[weakSelf coHereVisibleSessionsFromArray:weakSelf.sessionTopList.safeArray] mutableCopy];
         
         [weakSelf.sessionList replaceAllObjectsWithArray:[tempSessionList sortedArrayUsingDescriptors:@[sortDescriptorTime, sortDescriptorSessionID]].mutableCopy];
         [weakSelf.sessionTopList replaceAllObjectsWithArray:[tempSessionTopList sortedArrayUsingDescriptors:@[sortDescriptorTopTime, sortDescriptorSessionID]].mutableCopy];

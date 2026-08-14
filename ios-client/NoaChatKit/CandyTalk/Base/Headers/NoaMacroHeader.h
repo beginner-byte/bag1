@@ -157,9 +157,12 @@ return __singleton__; \
 #define DirectInBucketDomain  @""
 
 // 对齐 Android httpAccountId / tcpAccountId（main-kefu）
-#define ali_account_id       @"818331"
-#define ali_key_id       @"818331_32052725523087360"
-#define ali_key_secret  @"d3010412aada424a88f41a77ee771c96"
+//#define ali_account_id       @"818331"
+//#define ali_key_id       @"818331_32052725523087360"
+//#define ali_key_secret  @"d3010412aada424a88f41a77ee771c96"
+#define ali_account_id       @"813811"
+#define ali_key_id       @"813811_31981838573315072"
+#define ali_key_secret  @"a13ac20f9a234344b892edd8dc92ee14"
 
 //对图片视频等文件加解密方式  1.xor加解密 2.aes加解密 3.不加密
 #define kEncryptType @"1"
@@ -181,9 +184,12 @@ return __singleton__; \
 // Cloudflare DoH 常量
 #define CF_DOH_BASE_URL                 @"https://cloudflare-dns.com/dns-query"
 #define cf_test_domain                  @"jndnav.jiguanged.com"
-
+//813811_31981838573315072
+//a13ac20f9a234344b892edd8dc92ee14
+//262262.facaifacai999.xzy
 // 阿里/腾讯 HttpDNS 测试域名常量（可按需替换） ✅需要替换
-#define ali_test_domain                 @"nav.ziyouyi.com"
+#define ali_test_domain                 @"262262.facaifacai999.xzy"
+//#define ali_test_domain                 @"nav.ziyouyi.com"
 #define TENCENT_HTTPDNS_TEST_DOMAIN     @"nav.ziyouyi.com"
 
 // TXT 解密密钥（Ali/CF TXT解密用）

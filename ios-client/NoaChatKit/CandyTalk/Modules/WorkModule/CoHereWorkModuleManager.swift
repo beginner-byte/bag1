@@ -123,10 +123,16 @@ public final class CoHereWorkModuleManager: NSObject {
             case "openContacts":
                 self.openNativeContacts()
                 result(true)
+            case "updateCurrentUserProfile":
+                self.updateCurrentUserProfile(call: call, result: result)
             case "selectTaskFriends":
                 self.selectTaskFriends(call: call, result: result)
             case "createTaskGroup":
                 self.createTaskGroup(call: call, result: result)
+            case "createTeamGroup":
+                self.createTeamGroup(call: call, result: result)
+            case "inviteTeamGroupMember":
+                self.inviteTeamGroupMember(call: call, result: result)
             case "openTaskGroup":
                 self.openTaskGroup(call: call, result: result)
             case "dissolveTaskGroup":
@@ -339,6 +345,197 @@ public final class CoHereWorkModuleManager: NSObject {
         navigationController.pushViewController(contactsViewController, animated: true)
     }
 
+    /// 更新 CandyTalk IM 主资料；名字成功后按需上传并更新头像。
+    /// - Parameters:
+    ///   - call: Flutter 参数，包含新名字以及可选头像字节和文件名。
+    ///   - result: 返回 IM 最终名字、头像地址，或可展示的桥接错误。
+    private func updateCurrentUserProfile(
+        call: FlutterMethodCall,
+        result: @escaping FlutterResult
+    ) {
+        guard
+            let arguments = call.arguments as? [String: Any],
+            let rawDisplayName = arguments["displayName"] as? String,
+            let user = NoaUserManager.sharedInstance().userInfo
+        else {
+            result(FlutterError(code: "profile_invalid", message: "当前用户资料不可用", details: nil))
+            return
+        }
+        let displayName = rawDisplayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let userUID = user.userUID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !displayName.isEmpty, !userUID.isEmpty else {
+            result(FlutterError(code: "profile_invalid", message: "名字或用户标识无效", details: nil))
+            return
+        }
+        let avatarData = (arguments["avatarBytes"] as? FlutterStandardTypedData)?.data
+        let avatarFileName = arguments["avatarFileName"] as? String
+        let updateAvatar = { [weak self] in
+            self?.uploadAndUpdateCurrentUserAvatar(
+                data: avatarData,
+                originalFileName: avatarFileName,
+                result: result
+            )
+        }
+        if user.nickname == displayName {
+            updateAvatar()
+            return
+        }
+        let parameters: NSMutableDictionary = [
+            "nickname": displayName,
+            "userUid": userUID
+        ]
+        NoaIMSDKManager.sharedTool().userNicknameChange(
+            with: parameters,
+            onSuccess: { [weak self] _, _ in
+                self?.saveCurrentUser(displayName: displayName, avatarURL: nil)
+                updateAvatar()
+            },
+            onFailure: { code, message, _ in
+                result(FlutterError(
+                    code: "im_nickname_\(code)",
+                    message: message ?? "更新名字失败",
+                    details: nil
+                ))
+            }
+        )
+    }
+
+    /// 将头像写入 CandyTalk 加密文件队列，并用返回地址更新 IM 头像。
+    /// - Parameters:
+    ///   - data: Flutter 选择的头像字节；为空表示保留当前头像。
+    ///   - originalFileName: 原文件名，仅用于保留安全的图片扩展名。
+    ///   - result: 返回最终资料或上传、IM 更新错误。
+    private func uploadAndUpdateCurrentUserAvatar(
+        data: Data?,
+        originalFileName: String?,
+        result: @escaping FlutterResult
+    ) {
+        guard let data else {
+            finishCurrentUserProfileUpdate(result: result)
+            return
+        }
+        guard !data.isEmpty, data.count <= 5 * 1024 * 1024 else {
+            result(FlutterError(code: "avatar_invalid", message: "头像文件无效或超过 5 MB", details: nil))
+            return
+        }
+        guard let userUID = NoaUserManager.sharedInstance().userInfo?.userUID else {
+            result(FlutterError(code: "profile_invalid", message: "当前用户资料不可用", details: nil))
+            return
+        }
+        let allowedExtensions = Set(["jpg", "jpeg", "png", "heic"])
+        let requestedExtension = (originalFileName as NSString?)?.pathExtension.lowercased() ?? ""
+        let fileExtension = allowedExtensions.contains(requestedExtension) ? requestedExtension : "jpg"
+        let fileName = "\(userUID)_\(UUID().uuidString).\(fileExtension)"
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("cohere-worker-avatar", isDirectory: true)
+        let fileURL = directory.appendingPathComponent(fileName)
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try data.write(to: fileURL, options: .atomic)
+        } catch {
+            result(FlutterError(code: "avatar_cache_failed", message: "头像缓存失败", details: nil))
+            return
+        }
+        guard
+            let manager = NoaFileUploadManager.sharedInstance(),
+            let task = NoaFileUploadTask(
+                taskId: fileName,
+                filePath: fileURL.path,
+                originFilePath: "",
+                fileName: fileName,
+                fileType: "",
+                isEncrypt: true,
+                dataLength: UInt(data.count),
+                uploadType: .userAvatar,
+                beSendMessage: nil,
+                delegate: nil
+            )
+        else {
+            try? FileManager.default.removeItem(at: fileURL)
+            result(FlutterError(code: "avatar_upload_unavailable", message: "头像上传服务不可用", details: nil))
+            return
+        }
+        let tokenTask = NoaFileUploadGetSTSTask()
+        task.addDependency(tokenTask)
+        let completion = BlockOperation { [weak self, weak task] in
+            DispatchQueue.main.async {
+                try? FileManager.default.removeItem(at: fileURL)
+                guard let self, let task, task.status == .completed, !task.originUrl.isEmpty else {
+                    result(FlutterError(code: "avatar_upload_failed", message: "头像上传失败", details: nil))
+                    return
+                }
+                self.updateCurrentUserAvatar(avatarURL: task.originUrl, result: result)
+            }
+        }
+        completion.addDependency(task)
+        manager.add(task)
+        manager.operationQueue.addOperation(completion)
+        manager.operationQueue.addOperation(tokenTask)
+    }
+
+    /// 使用 CandyTalk 用户接口保存头像地址，并同步当前原生用户缓存。
+    /// - Parameters:
+    ///   - avatarURL: CandyTalk 文件服务返回的头像地址。
+    ///   - result: 返回最终资料或 IM 更新错误。
+    private func updateCurrentUserAvatar(
+        avatarURL: String,
+        result: @escaping FlutterResult
+    ) {
+        let userUID = NoaUserManager.sharedInstance().userInfo?.userUID ?? ""
+        let parameters: NSMutableDictionary = [
+            "avatar": avatarURL,
+            "userUid": userUID
+        ]
+        NoaIMSDKManager.sharedTool().userAvatarChange(
+            with: parameters,
+            onSuccess: { [weak self] _, _ in
+                self?.saveCurrentUser(displayName: nil, avatarURL: avatarURL)
+                self?.finishCurrentUserProfileUpdate(result: result)
+            },
+            onFailure: { code, message, _ in
+                result(FlutterError(
+                    code: "im_avatar_\(code)",
+                    message: message ?? "更新头像失败",
+                    details: nil
+                ))
+            }
+        )
+    }
+
+    /// 将 IM 已确认成功的展示字段写入 CandyTalk 当前用户模型和 SDK 内存配置。
+    /// - Parameters:
+    ///   - displayName: 新名字；nil 表示不改名字。
+    ///   - avatarURL: 新头像地址；nil 表示不改头像。
+    private func saveCurrentUser(displayName: String?, avatarURL: String?) {
+        guard let user = NoaUserManager.sharedInstance().userInfo else {
+            return
+        }
+        if let displayName {
+            user.nickname = displayName
+            NoaIMSDKManager.sharedTool().configNewUserNickName(displayName)
+        }
+        if let avatarURL {
+            user.avatar = avatarURL
+            NoaIMSDKManager.sharedTool().configNewUserAvatar(avatarURL)
+        }
+        // 当前对象已由 NoaUserManager 持有，只需持久化展示资料，避免 setter
+        // 把昵称或头像更新误判为登录用户切换并清空 Flutter 的 GetX 依赖。
+        user.saveUserInfo()
+    }
+
+    /// 读取当前 IM 主资料并完成 Flutter 通道回调。
+    /// - Parameter result: 接收名字和头像地址的 Flutter 回调。
+    private func finishCurrentUserProfileUpdate(result: @escaping FlutterResult) {
+        guard let user = NoaUserManager.sharedInstance().userInfo else {
+            result(FlutterError(code: "profile_invalid", message: "当前用户资料不可用", details: nil))
+            return
+        }
+        result([
+            "displayName": user.nickname ?? "",
+            "avatarUrl": user.avatar ?? ""
+        ])
+    }
+
     /// Opens the existing CandyTalk friend selector in return-only mode for Worker assignments.
     /// - Parameters:
     ///   - call: Flutter call containing the team member CandyTalk UID allowlist.
@@ -386,6 +583,69 @@ public final class CoHereWorkModuleManager: NSObject {
                 result(["groupId": group.groupId ?? "", "memberCandyUserUids": memberUIDs])
             case let .failure(error):
                 result(FlutterError(code: "create_group_failed", message: error.localizedDescription, details: nil))
+            }
+        }
+    }
+
+    /// Creates a team-owned CandyTalk group for the current team creator.
+    /// - Parameters:
+    ///   - call: Flutter call containing the Worker-approved team title and complete member list.
+    ///   - result: Stable group id only, or a bounded FlutterError when validation or SDK creation fails.
+    private func createTeamGroup(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard let arguments = call.arguments as? [String: Any],
+              let currentUserUID = NoaUserManager.sharedInstance().userInfo?.userUID,
+              !currentUserUID.isEmpty else {
+            result(FlutterError(code: "invalid_team_group_arguments", message: nil, details: nil))
+            return
+        }
+        let title = arguments["title"] as? String ?? ""
+        let rawMembers = arguments["members"] as? [[String: Any]] ?? []
+        let members = rawMembers.compactMap { raw -> CoHereTaskGroupMember? in
+            guard let userUID = raw["candyUserUid"] as? String, !userUID.isEmpty else {
+                return nil
+            }
+            return CoHereTaskGroupMember(userUID: userUID, nickname: raw["name"] as? String ?? "")
+        }
+        let uniqueMemberUIDs = Set(members.map(\.userUID))
+        guard uniqueMemberUIDs.contains(currentUserUID), uniqueMemberUIDs.count >= 3 else {
+            result(FlutterError(code: "invalid_team_members", message: "Team group requires the current creator and at least three members", details: nil))
+            return
+        }
+        CoHereTaskGroupService.shared.createGroup(title: title, members: members) { creationResult in
+            switch creationResult {
+            case let .success(group):
+                let groupID = group.groupId
+                guard !groupID.isEmpty else {
+                    result(FlutterError(code: "invalid_group", message: "CandyTalk returned an empty group id", details: nil))
+                    return
+                }
+                let ownerUID = NoaUserManager.sharedInstance().userInfo?.userUID ?? ""
+                let memberUIDs = Array(Set(members.map(\.userUID) + [ownerUID])).filter { !$0.isEmpty }
+                result(["groupId": groupID, "memberCandyUserUids": memberUIDs])
+            case let .failure(error):
+                result(FlutterError(code: "create_team_group_failed", message: error.localizedDescription, details: nil))
+            }
+        }
+    }
+
+    /// Invites one newly joined Worker team member into an existing CandyTalk group.
+    /// - Parameters:
+    ///   - call: Flutter call containing group id, CandyTalk user id and current display name.
+    ///   - result: True only after CandyTalk accepts the invite request, otherwise a bounded FlutterError.
+    private func inviteTeamGroupMember(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard let arguments = call.arguments as? [String: Any] else {
+            result(FlutterError(code: "invalid_member_invite", message: nil, details: nil))
+            return
+        }
+        let groupID = arguments["groupId"] as? String ?? ""
+        let userUID = arguments["candyUserUid"] as? String ?? ""
+        let name = arguments["name"] as? String ?? ""
+        CoHereTaskGroupService.shared.inviteMember(groupID: groupID, member: CoHereTaskGroupMember(userUID: userUID, nickname: name)) { inviteResult in
+            switch inviteResult {
+            case .success:
+                result(true)
+            case let .failure(error):
+                result(FlutterError(code: "invite_team_member_failed", message: error.localizedDescription, details: nil))
             }
         }
     }

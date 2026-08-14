@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:work_module/core/host/work_host_bridge.dart';
 import 'package:work_module/core/model/team/team.item.model.dart';
 import 'package:work_module/core/repository/task.repository.dart';
-import 'package:work_module/core/host/work_host_bridge.dart';
 import 'package:work_module/core/service/work_session_service.dart';
 import 'package:work_module/shared/l10n/generated/l10n.dart';
 
@@ -22,7 +22,7 @@ class CreateTaskController extends GetxController {
   /// 当前登录用户服务，用于阻止非团队创建者提交。
   final WorkSessionService sessionService = Get.find<WorkSessionService>();
 
-  /// iOS 原生能力桥，负责只展示当前用户 CandyTalk 好友并静默创建群聊。
+  /// iOS 原生能力桥，只用于从 CandyTalk 好友中选择任务负责人。
   final WorkHostBridge hostBridge = Get.find<WorkHostBridge>();
 
   /// 任务名称输入控制器，生命周期跟随创建任务路由。
@@ -160,46 +160,13 @@ class CreateTaskController extends GetxController {
     submitting.value = true;
 
     try {
-      var task = await repository.createTask(
+      final task = await repository.createTask(
         teamId: currentTeam.id,
         title: normalizedTitle,
         description: normalizedDescription,
         time: _formatTimeRange(startTime: startTime, endTime: endTime),
         assigneeIds: selectedAssigneeIds.toList(growable: false),
       );
-
-      if (task.groupAction == 'create' && task.groupOperationId.isNotEmpty) {
-        late final TaskGroupCreationResult creation;
-        try {
-          creation = await hostBridge.createTaskGroup(
-            title: task.title,
-            members: task.assignees
-                .map(
-                  (member) => {
-                    'candyUserUid': member.candyUserUid,
-                    'name': member.name,
-                  },
-                )
-                .where((member) => member['candyUserUid']!.isNotEmpty)
-                .toList(growable: false),
-          );
-        } catch (error) {
-          await repository.failTaskGroup(
-            taskId: task.id,
-            operationId: task.groupOperationId,
-            message: error.toString(),
-          );
-          rethrow;
-        }
-        // Binding is intentionally outside the SDK failure handler: the group already exists,
-        // so a network error must never mark it for creation retry and produce a duplicate group.
-        task = await repository.bindTaskGroup(
-          taskId: task.id,
-          groupId: creation.groupId,
-          operationId: task.groupOperationId,
-          memberCandyUserUids: creation.memberCandyUserUids,
-        );
-      }
 
       EasyLoading.showSuccess(S.current.teamDetailTaskCreated);
       Get.back(result: task);

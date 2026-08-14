@@ -118,6 +118,23 @@ final class WorkHostBridge extends ChangeNotifier {
     }
   }
 
+  /// 请求 CandyTalk 更新当前用户的 IM 名字和可选头像，并返回 IM 最终头像地址。
+  ///
+  /// [displayName] 是去除首尾空白后的新名字；[avatarBytes] 为空时保留当前 IM 头像。
+  Future<String> updateCurrentUserProfile({
+    required String displayName,
+    Uint8List? avatarBytes,
+    String? avatarFileName,
+  }) async {
+    final result = await _channel
+        .invokeMapMethod<String, dynamic>('updateCurrentUserProfile', {
+          'displayName': displayName,
+          'avatarBytes': ?avatarBytes,
+          'avatarFileName': ?avatarFileName,
+        });
+    return result?['avatarUrl']?.toString() ?? '';
+  }
+
   /// 打开 CandyTalk 原生好友选择器，并只允许选择当前团队对应的好友。
   Future<List<String>> selectTaskFriends(
     List<String> allowedCandyUserUids,
@@ -153,6 +170,37 @@ final class WorkHostBridge extends ChangeNotifier {
           ? memberUIDs.map((value) => value.toString()).toList(growable: false)
           : const [],
     );
+  }
+
+  /// 请求当前 CandyTalk 用户创建团队群，只返回稳定群标识。
+  Future<TeamGroupCreationResult> createTeamGroup({
+    required String title,
+    required List<Map<String, String>> members,
+  }) async {
+    final result = await _channel.invokeMapMethod<String, dynamic>(
+      'createTeamGroup',
+      {'title': title, 'members': members},
+    );
+    final memberUIDs = result?['memberCandyUserUids'];
+    return TeamGroupCreationResult(
+      groupId: result?['groupId']?.toString() ?? '',
+      memberCandyUserUids: memberUIDs is List
+          ? memberUIDs.map((value) => value.toString()).toList(growable: false)
+          : const [],
+    );
+  }
+
+  /// 邀请一名新增团队成员进入已绑定 CandyTalk 群。
+  Future<void> inviteTeamGroupMember({
+    required String groupId,
+    required String candyUserUid,
+    required String name,
+  }) async {
+    await _channel.invokeMethod<void>('inviteTeamGroupMember', {
+      'groupId': groupId,
+      'candyUserUid': candyUserUid,
+      'name': name,
+    });
   }
 
   /// 打开已经绑定到任务的原生 CandyTalk 群聊。
@@ -207,5 +255,20 @@ final class TaskGroupCreationResult {
   final String groupId;
 
   /// 创建人和全部负责人组成的实际成员集合。
+  final List<String> memberCandyUserUids;
+}
+
+/// CandyTalk 团队群创建结果，包含实际初始成员集合。
+final class TeamGroupCreationResult {
+  /// 创建不可变团队群结果。
+  const TeamGroupCreationResult({
+    required this.groupId,
+    required this.memberCandyUserUids,
+  });
+
+  /// CandyTalk 群唯一标识。
+  final String groupId;
+
+  /// CandyTalk 实际建群成员 UID。
   final List<String> memberCandyUserUids;
 }

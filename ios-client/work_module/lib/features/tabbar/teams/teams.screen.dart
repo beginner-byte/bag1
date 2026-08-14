@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:work_module/core/host/work_host_bridge.dart';
 import 'package:work_module/features/tabbar/teams/team.cell.dart';
 import 'package:work_module/features/tabbar/teams/teams.controller.dart';
 import 'package:work_module/shared/l10n/generated/l10n.dart';
@@ -23,8 +22,6 @@ class TeamsScreen extends GetView<TeamsController> with ScreenMixin {
   /// 构建团队页标题栏。
   @override
   PreferredSizeWidget? appBar(BuildContext context) {
-    final bridge = Get.find<WorkHostBridge>();
-
     return AppBar(
       title: Text(S.of(context).mainTabTeams),
       centerTitle: false,
@@ -33,7 +30,7 @@ class TeamsScreen extends GetView<TeamsController> with ScreenMixin {
       surfaceTintColor: Colors.transparent,
       actions: [
         IconButton(
-          onPressed: bridge.openContacts,
+          onPressed: controller.onCommunicationPressed,
           icon: const Icon(Icons.group_outlined),
         ),
         IconButton(
